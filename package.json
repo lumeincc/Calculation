@@ -1,0 +1,44 @@
+{
+  "name": "stroyraschet",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "СтройРасчёт — строительные калькуляторы, тоннаж металла и сметы в браузере",
+  "scripts": {
+    "predev": "node scripts/copy-assets.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-assets.mjs",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@e965/xlsx": "0.20.3",
+    "7z-wasm": "^1.2.0",
+    "dxf-parser": "1.1.2",
+    "fflate": "0.8.3",
+    "lucide-react": "^1.49.0",
+    "mammoth": "1.13.0",
+    "pdfjs-dist": "6.3.289",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "write-excel-file": "^4.1.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.19.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.86.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3"
+  }
+}

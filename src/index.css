@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-brand-50: var(--color-orange-50);
+  --color-brand-100: var(--color-orange-100);
+  --color-brand-200: var(--color-orange-200);
+  --color-brand-300: var(--color-orange-300);
+  --color-brand-400: var(--color-orange-400);
+  --color-brand-500: var(--color-orange-500);
+  --color-brand-600: var(--color-orange-600);
+  --color-brand-700: var(--color-orange-700);
+  --color-brand-800: var(--color-orange-800);
+  --color-brand-900: var(--color-orange-900);
+  --color-brand-950: var(--color-orange-950);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  ::selection {
+    @apply bg-brand-200 text-zinc-900;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900;
+  }
+  .input {
+    @apply h-10 w-full min-w-0 rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 shadow-xs transition
+      placeholder:text-zinc-400 hover:border-zinc-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none
+      dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600;
+  }
+  .input-sm {
+    @apply h-8 rounded-md px-2 text-sm;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400;
+  }
+  .doc-html table {
+    @apply my-3 w-full border-collapse text-sm;
+  }
+  .doc-html td,
+  .doc-html th {
+    @apply border border-zinc-300 px-2 py-1 align-top dark:border-zinc-700;
+  }
+  .doc-html p {
+    @apply my-1.5;
+  }
+  .doc-html h1 {
+    @apply my-3 text-xl font-semibold;
+  }
+  .doc-html h2 {
+    @apply my-2 text-lg font-semibold;
+  }
+  .doc-html img {
+    @apply max-w-full;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+}
