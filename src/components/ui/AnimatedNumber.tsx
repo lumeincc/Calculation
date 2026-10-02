@@ -13,7 +13,8 @@ export function AnimatedNumber({ value, digits = 2, minDigits = 0, format, durat
     const a = from.current
     let raf = 0
     const step = (t: number) => {
-      const k = instant ? 1 : Math.min(1, (t - start) / duration)
+      // Frame timestamps can precede start slightly; clamp so the number never overshoots backwards.
+      const k = instant ? 1 : Math.min(1, Math.max(0, (t - start) / duration))
       const e = 1 - Math.pow(1 - k, 3)
       const v = a + (value - a) * e
       from.current = v
