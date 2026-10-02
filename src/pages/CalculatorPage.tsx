@@ -66,7 +66,6 @@ function CalculatorView({ id }: { id: string }) {
         <Link to={`/calc?cat=${def.category}`} className="hover:text-zinc-800 dark:hover:text-zinc-200">{category?.title}</Link>
       </div>
       <PageHeader
-        icon={<def.icon size={22} />}
         title={def.title}
         subtitle={def.short}
         actions={

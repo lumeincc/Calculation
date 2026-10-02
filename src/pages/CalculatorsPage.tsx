@@ -1,4 +1,4 @@
-import { Calculator, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { CALCULATORS, CATEGORIES, searchCalculators } from '@/calculators/registry'
 import { CalculatorCard } from '@/components/calculator/CalculatorCard'
@@ -19,7 +19,7 @@ export function CalculatorsPage() {
   }
   return (
     <div>
-      <PageHeader icon={<Calculator size={22} />} title="Калькуляторы" subtitle={`${CALCULATORS.length} расчётов: металл, фундамент, стены, отделка, кровля, земляные работы`} />
+      <PageHeader title="Калькуляторы" subtitle={`${CALCULATORS.length} расчётов: металл, фундамент, стены, отделка, кровля, земляные работы`} />
       <div className="relative mb-4">
         <Search size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
         <input className="input h-11 pl-10" placeholder="Что посчитать? Например: швеллер, газобетон, щебень" value={q} onChange={(e) => update({ q: e.target.value })} autoFocus />

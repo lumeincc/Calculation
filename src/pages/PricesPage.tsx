@@ -1,4 +1,4 @@
-import { Plus, RotateCcw, Search, Tags, Trash2 } from 'lucide-react'
+import { Plus, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button, IconButton } from '@/components/ui/Button'
 import { Field, NumberInput, Select, TextInput } from '@/components/ui/Field'
@@ -28,7 +28,6 @@ export function PricesPage() {
   return (
     <div>
       <PageHeader
-        icon={<Tags size={22} />}
         title="Справочник цен"
         subtitle="Цены в тенге используются калькуляторами и при добавлении позиций в смету. Заполните свои цены — они сохранятся в браузере."
         actions={

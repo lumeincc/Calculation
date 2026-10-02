@@ -325,7 +325,7 @@ export function AccountPage() {
   if (!token) return <AuthForm />
   return (
     <div>
-      <PageHeader icon={<Cloud size={22} />} title="Аккаунт и команда" subtitle="Общие сметы и справочники для всей компании, доступ с любого устройства." />
+      <PageHeader title="Аккаунт и команда" subtitle="Общие сметы и справочники для всей компании, доступ с любого устройства." />
       <Workspace />
     </div>
   )

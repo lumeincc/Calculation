@@ -37,7 +37,6 @@ export function EstimatesPage() {
   return (
     <div>
       <PageHeader
-        icon={<FileSpreadsheet size={22} />}
         title="Сметы"
         subtitle="Сметы хранятся в браузере. Выгружайте в Excel, печатайте в PDF, делайте резервные копии в настройках."
         actions={

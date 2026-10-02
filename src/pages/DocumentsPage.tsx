@@ -231,7 +231,7 @@ export function DocumentsPage() {
   if (files.length === 0 && !busy) {
     return (
       <div>
-        <PageHeader icon={<FolderOpen size={22} />} title="Документы" subtitle="Загрузите проектную документацию: сметы, спецификации, ведомости, чертежи. Архивы распаковываются автоматически." />
+        <PageHeader title="Документы" subtitle="Загрузите проектную документацию: сметы, спецификации, ведомости, чертежи. Архивы распаковываются автоматически." />
         <Dropzone onFiles={(f) => void ingest(f)} busy={busy} progress={progress} />
         <div className="stagger mt-6 grid gap-4 md:grid-cols-3">
           {[
@@ -253,7 +253,6 @@ export function DocumentsPage() {
   return (
     <div>
       <PageHeader
-        icon={<FolderOpen size={22} />}
         title="Документы"
         subtitle={`${docs.length} ${plural(docs.length, ['файл', 'файла', 'файлов'])} · обработка в браузере, без загрузки на сервер`}
         actions={<Button size="sm" variant="danger" onClick={() => confirm('Убрать все документы из списка?') && clear()}><Trash2 size={15} /> Очистить</Button>}

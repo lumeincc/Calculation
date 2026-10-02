@@ -1,4 +1,4 @@
-import { Download, Settings, Trash2, Upload } from 'lucide-react'
+import { Download, Trash2, Upload } from 'lucide-react'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Field, NumberInput, Segmented, TextInput } from '@/components/ui/Field'
@@ -22,7 +22,7 @@ export function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   return (
     <div className="max-w-3xl">
-      <PageHeader icon={<Settings size={22} />} title="Настройки" />
+      <PageHeader title="Настройки" />
       <div className="space-y-6">
         <section className="card p-5">
           <h2 className="mb-1 font-semibold">Реквизиты исполнителя</h2>
