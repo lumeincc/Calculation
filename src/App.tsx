@@ -9,6 +9,10 @@ import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { PricesPage } from '@/pages/PricesPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { AccountPage } from '@/pages/AccountPage'
+import { startSync } from '@/lib/sync'
+import { useAuth } from '@/store/auth'
+import { useEffect } from 'react'
 
 const DocumentsPage = lazy(() => import('@/pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage })))
 const EstimatePrintPage = lazy(() => import('@/pages/EstimatePrintPage').then((m) => ({ default: m.EstimatePrintPage })))
@@ -28,6 +32,7 @@ const router = createHashRouter([
       { path: '/estimates/:id', element: <EstimatePage /> },
       { path: '/prices', element: <PricesPage /> },
       { path: '/settings', element: <SettingsPage /> },
+      { path: '/account', element: <AccountPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
@@ -35,5 +40,11 @@ const router = createHashRouter([
 ])
 
 export function App() {
+  const token = useAuth((s) => s.token)
+  useEffect(() => {
+    // Resume syncing when the app opens with a saved session.
+    if (token) startSync()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return <RouterProvider router={router} />
 }

@@ -25,3 +25,8 @@ dist-ssr
 
 # pdf.js runtime assets copied by scripts/copy-assets.mjs
 public/vendor
+
+# Go server: embedded frontend copy and local database
+server/web/*
+!server/web/README.txt
+server/data

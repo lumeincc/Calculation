@@ -1,0 +1,8 @@
+node_modules
+dist
+public/vendor
+server/web/assets
+server/web/index.html
+server/web/vendor
+server/data
+.git

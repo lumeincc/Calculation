@@ -1,5 +1,5 @@
 import {
-  Calculator, FileSpreadsheet, FolderOpen, Home, Menu, Monitor, Moon, Search, Settings, Sun, Tags, Weight, X,
+  Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Menu, Monitor, Moon, Search, Settings, Sun, Tags, Weight, X,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
@@ -7,15 +7,17 @@ import { applyTheme, useSettings, type Theme } from '@/store/settings'
 import { useEstimates } from '@/store/estimates'
 import { useDocs } from '@/store/docs'
 import { CommandPalette } from './CommandPalette'
+import { Dock } from './Dock'
 import { Toasts } from './Toasts'
 
-const NAV = [
+const NAV_FULL = [
   { to: '/', label: 'Главная', icon: Home, end: true },
   { to: '/calc', label: 'Калькуляторы', icon: Calculator },
   { to: '/docs', label: 'Документы', icon: FolderOpen },
   { to: '/estimates', label: 'Сметы', icon: FileSpreadsheet },
   { to: '/calc/metal', label: 'Тоннаж металла', icon: Weight },
   { to: '/prices', label: 'Справочник цен', icon: Tags },
+  { to: '/account', label: 'Аккаунт и команда', icon: CircleUserRound },
   { to: '/settings', label: 'Настройки', icon: Settings },
 ]
 
@@ -25,7 +27,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const count: Record<string, number> = { '/estimates': estimates, '/docs': docs }
   return (
     <nav className="flex flex-col gap-0.5">
-      {NAV.map(({ to, label, icon: Icon, end }) => (
+      {NAV_FULL.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}
@@ -105,27 +107,9 @@ export function Layout() {
     window.scrollTo(0, 0)
   }, [location.pathname])
 
-  const searchButton = (
-    <button
-      onClick={() => setPalette(true)}
-      className="flex h-9 w-full items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-500 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
-    >
-      <Search size={15} />
-      <span className="flex-1 text-left">Поиск…</span>
-      <kbd className="hidden rounded border border-zinc-200 px-1.5 font-sans text-[10px] text-zinc-400 sm:inline dark:border-zinc-700">Ctrl K</kbd>
-    </button>
-  )
-
   return (
     <div className="min-h-dvh">
-      {/* Desktop sidebar */}
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-zinc-200 bg-white/80 px-3 py-4 backdrop-blur lg:flex dark:border-zinc-800 dark:bg-zinc-950/80">
-        <div className="mb-4 px-1">{searchButton}</div>
-        <NavItems />
-        <div className="mt-auto space-y-3 px-1">
-          <ThemeSwitch />
-        </div>
-      </aside>
+      <Dock onSearch={() => setPalette(true)} />
 
       {/* Mobile top bar */}
       <header className="no-print sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white/90 px-4 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-950/90">
@@ -154,7 +138,7 @@ export function Layout() {
         </div>
       )}
 
-      <main className="lg:pl-64">
+      <main className="lg:pl-[84px]">
         <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div key={location.pathname} className="animate-page">
             <Outlet />
