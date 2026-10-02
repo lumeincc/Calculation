@@ -8,10 +8,7 @@ export function Logo({ className = '' }: { className?: string }) {
         <path d="M7 23h18M9 23V12l7-5 7 5v11" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
         <path d="M13 23v-6h6v6" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round" />
       </svg>
-      <span className="leading-tight">
-        <span className="block text-[15px] font-semibold tracking-tight">СтройРасчёт</span>
-        <span className="block text-[11px] text-zinc-500">расчёты · сметы · тоннаж</span>
-      </span>
+      <span className="text-[15px] font-semibold tracking-tight">СтройРасчёт</span>
     </Link>
   )
 }
