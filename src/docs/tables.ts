@@ -13,7 +13,11 @@ const norm = (c: Cell | undefined) => String(c ?? '').toLowerCase().replace(/ё/
 /** «1 234,56» / «1234.56» / «1,234.56» → number; null when the cell is not a number. */
 export function parseNum(c: Cell | undefined): number | null {
   if (typeof c === 'number') return Number.isFinite(c) ? c : null
-  let s = String(c ?? '').replace(/[\s  ]/g, '').replace(/(руб\.?|₽|р\.|₸|тг\.?|тенге)$/i, '')
+  const raw = String(c ?? '').trim()
+  // Digits separated by spaces are a number only in thousands groups («12 345»);
+  // «5862 8» is two PDF columns glued together.
+  if (/\d[\s\u00a0\u202f]+\d/.test(raw) && !/^[-+]?\d{1,3}([\s\u00a0\u202f]\d{3})+([.,]\d+)?(\s*(руб\.?|₽|р\.|₸|тг\.?|тенге))?$/i.test(raw)) return null
+  let s = raw.replace(/[\s  ]/g, '').replace(/(руб\.?|₽|р\.|₸|тг\.?|тенге)$/i, '')
   if (!s || !/^[-+]?[\d.,]+$/.test(s)) return null
   if (s.includes(',') && s.includes('.')) s = s.lastIndexOf('.') > s.lastIndexOf(',') ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.')
   else if ((s.match(/,/g)?.length ?? 0) === 1) s = s.replace(',', '.')
@@ -33,9 +37,11 @@ export interface ColumnMap {
   unitMass?: number
   unitMassT?: boolean
   length?: number
+  /** Column with the steel section («Профиль», «Сечение»). */
+  profile?: number
 }
 
-type Role = Exclude<keyof ColumnMap, 'massUnitT' | 'unitMassT'>
+type Role = Exclude<keyof ColumnMap, 'massUnitT' | 'unitMassT'> | 'material'
 
 const ROLE_TESTS: [Role, RegExp, RegExp?][] = [
   ['unit', /(^|\s)ед\.?(\s|$)|ед\.\s*изм|единиц|изм\./],
@@ -44,7 +50,9 @@ const ROLE_TESTS: [Role, RegExp, RegExp?][] = [
   ['qty', /кол-?\s*во|количеств|^кол\.?$|^к-?во|объем(?!.*масс)|^кол /],
   ['length', /длин/],
   ['mass', /масс|вес(?!ь)/],
-  ['name', /наименован|наим\.|описание|материал|профил|сортамент|вид работ|работ[ыа]? и затрат|^позиция$/],
+  ['name', /наименован|наим\.|описание|вид работ|работ[ыа]? и затрат|^позиция$/],
+  ['profile', /профил|сечение|сортамент/],
+  ['material', /материал/],
 ]
 
 function rolesOf(text: string): Role[] {
@@ -57,12 +65,13 @@ function rolesOf(text: string): Role[] {
 function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
   const width = Math.max(...rows.slice(r, r + span).map((x) => x.length))
   const map: Partial<ColumnMap> = {}
+  let material: number | undefined
   for (let c = 0; c < width; c++) {
     const t = rows.slice(r, r + span).map((row) => norm(row[c])).filter(Boolean).join(' ')
     if (!t || t.length > 120) continue
     const roles = rolesOf(t)
     if (roles.includes('mass')) {
-      const isUnit = /(ед|1\s*(шт|м|п\.?\s*м)|одного|един)/.test(t) && !/(общ|всего|итого)/.test(t)
+      const isUnit = /(ед|1\s*(шт|м|п\.?\s*м)|одного|одной|одна|един)/.test(t) && !/(общ|всего|всех|итого)/.test(t)
       const isT = /(,|\s|\()\s*т\.?(\s|\)|$)|тонн/.test(t)
       if (isUnit) {
         if (map.unitMass === undefined) Object.assign(map, { unitMass: c, unitMassT: isT })
@@ -75,12 +84,16 @@ function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
     else if (roles.includes('unit') && map.unit === undefined) map.unit = c
     else if (roles.includes('length') && map.length === undefined) map.length = c
     else if (roles.includes('name') && map.name === undefined) map.name = c
+    else if (roles.includes('profile') && map.profile === undefined) map.profile = c
+    else if (roles.includes('material') && material === undefined) material = c
   }
+  // Metal schedules often have no «Наименование»: the section or material column names the row.
+  map.name ??= map.profile ?? material
   if (map.name === undefined || (map.qty === undefined && map.sum === undefined && map.mass === undefined)) return null
   return map as ColumnMap
 }
 
-const roleCount = (m: ColumnMap) => Object.keys(m).filter((k) => !k.endsWith('T')).length
+const roleCount = (m: ColumnMap) => Object.entries(m).filter(([k, v]) => !k.endsWith('T') && v !== undefined).length
 
 /** Detects the header row (single or two-row header) and maps columns to roles. */
 export function detectHeader(rows: Cell[][]): { headerRow: number; dataStart: number; map: ColumnMap } | null {
@@ -135,7 +148,9 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
   let group: string | undefined
   for (let r = dataStart; r < table.rows.length; r++) {
     const row = table.rows[r]
-    const name = String(row[map.name] ?? '').replace(/\s+/g, ' ').trim()
+    const profileCell = map.profile !== undefined && map.profile !== map.name ? String(row[map.profile] ?? '').trim() : ''
+    let name = String(row[map.name] ?? '').replace(/\s+/g, ' ').trim()
+    if (profileCell && profileCell !== name) name = name ? `${name} ${profileCell}` : profileCell
     const nonEmpty = row.filter((c) => norm(c) !== '')
     if (nonEmpty.length === 0) continue
     const numbers = nonEmpty.filter((c) => parseNum(c) !== null)
@@ -145,7 +160,9 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
       if (heading.length < 160 && !rolesOf(norm(heading)).includes('name')) group = heading
       continue
     }
-    if (!name || parseNum(name) !== null || TOTAL_RE.test(norm(name))) continue
+    // A bare number is not a name — unless it is a plate thickness in the section column («-4»).
+    const plateName = map.name === map.profile && parseProfile(name)?.type === 'sheet'
+    if (!name || (parseNum(name) !== null && !plateName) || TOTAL_RE.test(norm(name))) continue
 
     const unit = map.unit !== undefined ? String(row[map.unit] ?? '').trim() : ''
     let qty = map.qty !== undefined ? parseNum(row[map.qty]) : null
@@ -175,7 +192,7 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
     positions.push(pos)
 
     // Metal recognition: profile from the name (or the whole row for «Профиль» + «Наименование» layouts).
-    const profile = parseProfile(name) ?? parseProfile(nonEmpty.filter((c) => typeof c === 'string').join(' '))
+    const profile = (profileCell ? parseProfile(profileCell) : null) ?? parseProfile(name) ?? parseProfile(nonEmpty.filter((c) => typeof c === 'string').join(' '))
     if (profile) {
       const k = kgPerMetre(profile)
       const u = unit.toLowerCase().replace(/\.$/, '')
@@ -191,6 +208,8 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
         const len = lengthM > 100 ? lengthM / 1000 : lengthM // mm → m
         ;[m, from] = [q * len * k, 'length']
       }
+      // A single schedule row heavier than 500 t is a parsing artefact, not data.
+      if (m !== null && (!Number.isFinite(m) || m > 500_000)) [m, from] = [null, 'none']
       metal.push({
         id: uid(), fileId, source: table.title, raw: name, profile, name: profileName(profile),
         kgPerM: k, qty: q, unit, massKg: m, massFrom: from,

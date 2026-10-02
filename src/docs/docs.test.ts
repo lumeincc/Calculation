@@ -223,3 +223,20 @@ describe('pdf layout', () => {
     expect(metal[1].massKg).toBeCloseTo(5 * 78.5, 6)
   })
 })
+
+describe('metal sources', () => {
+  it('counts a summary once and drops documents with the same total', async () => {
+    const { metalSources } = await import('./metalSources')
+    const hit = (fileId: string, kg: number) => ({ fileId, massKg: kg }) as never
+    const files = [
+      { id: 'reg', name: 'Реестр 2020.xlsx' },
+      { id: 'sum', name: 'Выборка металла 2020.xlsx' },
+      { id: 'card', name: 'Тех карта 2020.xlsx' },
+      { id: 'other', name: 'Ограждение.xlsx' },
+    ]
+    const hits = [hit('reg', 4000), hit('reg', 3571.64), hit('sum', 7571.62), hit('card', 7571.64), hit('other', 500)]
+    const { sources, selected } = metalSources(files, hits)
+    expect([...selected].sort()).toEqual(['other', 'sum'])
+    expect(sources.find((s) => s.fileId === 'reg')!.duplicateOf).toBe('sum')
+  })
+})

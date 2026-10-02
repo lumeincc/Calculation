@@ -10,6 +10,7 @@ import { AddToEstimateDialog } from '@/components/estimate/AddToEstimateDialog'
 import { Button, IconButton } from '@/components/ui/Button'
 import { Badge, EmptyState, PageHeader, Stat, Tabs } from '@/components/ui/misc'
 import { KIND_LABEL as DOC_KIND } from '@/docs/detect'
+import { metalSources } from '@/docs/metalSources'
 import type { DocFile, DocKind, MetalHit, Position } from '@/docs/types'
 import { createItem, createSection, KIND_LABEL, type EstimateItem } from '@/lib/estimate'
 import { downloadBytes, exportTableXlsx } from '@/lib/export'
@@ -120,7 +121,12 @@ export function DocumentsPage() {
   const docs = files.filter((f) => f.kind !== 'archive')
   const byId = useMemo(() => new Map(files.map((f) => [f.id, f])), [files])
   const positions = useMemo(() => docs.flatMap((f) => analyses[f.id]?.positions ?? []), [docs, analyses])
-  const metal = useMemo(() => docs.flatMap((f) => analyses[f.id]?.metal ?? []), [docs, analyses])
+  const allMetal = useMemo(() => docs.flatMap((f) => analyses[f.id]?.metal ?? []), [docs, analyses])
+  const sourceInfo = useMemo(() => metalSources(docs, allMetal), [docs, allMetal])
+  const [sourceSel, setSourceSel] = useState<Set<string> | null>(null)
+  const activeSources = sourceSel ?? sourceInfo.selected
+  // Only selected documents count — the same metal is often listed in several of them.
+  const metal = useMemo(() => allMetal.filter((h) => activeSources.has(h.fileId)), [allMetal, activeSources])
   const metalGroups = useMemo(() => groupMetal(metal), [metal])
   const metalKg = metalGroups.reduce((s, g) => s + g.massKg, 0)
   const unknownMass = metal.filter((h) => h.massKg === null).length
@@ -256,7 +262,7 @@ export function DocumentsPage() {
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat label="Документов" value={docs.length} hint={Object.entries(counts).map(([k, n]) => `${DOC_KIND[k as DocKind]}: ${n}`).join(' · ')} />
               <Stat label="Найдено позиций" value={positions.length} hint={`на ${money(positions.reduce((s, p) => s + p.sum, 0))}`} />
-              <Stat label="Металл" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={`${metal.length} строк${unknownMass ? `, у ${unknownMass} нет массы` : ''}`} />
+              <Stat label="Металл" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={`${activeSources.size} из ${sourceInfo.sources.length} документов, без дублей`} />
               <Stat label="Таблиц" value={docs.reduce((s, f) => s + (analyses[f.id]?.tables.length ?? 0), 0)} hint={`${docs.reduce((s, f) => s + (analyses[f.id]?.pages ?? 0), 0)} стр. PDF`} />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -411,10 +417,35 @@ export function DocumentsPage() {
         )}
 
         {tab === 'metal' && (
-          metal.length === 0 ? (
+          allMetal.length === 0 ? (
             <EmptyState icon={<Weight size={28} />} title="Металлопрокат не найден" text="Загрузите спецификацию металла (КМ, КЖ) в Excel, PDF или Word — профили и масса будут собраны здесь." />
           ) : (
             <div className="space-y-4">
+              <div className="card p-4">
+                <h3 className="text-sm font-semibold">Какие документы считать</h3>
+                <p className="mt-0.5 mb-3 text-xs text-zinc-500">Один и тот же металл часто есть в нескольких документах (выборка, реестр, техкарта). Документы с одинаковым итогом считаются дублями — по умолчанию учитывается итоговая выборка.</p>
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {sourceInfo.sources.map((src) => (
+                    <label key={src.fileId} className="flex cursor-pointer items-center gap-3 py-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="accent-brand-600"
+                        checked={activeSources.has(src.fileId)}
+                        onChange={() => {
+                          const n = new Set(activeSources)
+                          if (n.has(src.fileId)) n.delete(src.fileId)
+                          else n.add(src.fileId)
+                          setSourceSel(n)
+                        }}
+                      />
+                      <span className="min-w-0 flex-1 truncate" title={byId.get(src.fileId)?.path}>{src.name}</span>
+                      {src.summary && <Badge tone="green">выборка</Badge>}
+                      {src.duplicateOf && <Badge tone="amber">дубль «{byId.get(src.duplicateOf)?.name}»</Badge>}
+                      <span className="w-28 text-right tabular-nums">{fmt(src.kg / 1000, 3)} т</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Общий тоннаж" value={fmt(metalKg / 1000, 3)} unit="т" accent />
                 <Stat label="Профилей" value={metalGroups.length} />
@@ -451,7 +482,7 @@ export function DocumentsPage() {
                         <td className="px-4 py-2 text-xs text-zinc-500">
                           {g.hits.slice(0, 3).map((h) => (
                             <div key={h.id} className="truncate" title={h.raw}>
-                              {byId.get(h.fileId)?.name}: «{h.raw}» — {h.qty} {h.unit}
+                              {byId.get(h.fileId)?.name}: «{h.raw}» — {h.qty ? `${fmt(h.qty, 3)} ${h.unit}` : `${fmt(h.massKg ?? 0, 2)} кг`}
                               {h.massKg === null && <span className="ml-1 text-amber-600">масса не определена</span>}
                             </div>
                           ))}

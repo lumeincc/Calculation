@@ -42,7 +42,7 @@ export function parseProfile(text: string): ProfileSpec | null {
   }
 
   // Уголок
-  if ((m = t.match(new RegExp(String.raw`(?:уголок|угол\.?|∟|(?:^|\s)l)\s*(?:г\/к\s*|равнопол\S*\s*|неравнопол\S*\s*)?${N}x${N}(?:x${N})?`)))) {
+  if ((m = t.match(new RegExp(String.raw`(?:уголок|угол\.?|∟|(?:^|\s)l\.?)\s*(?:г\/к\s*|равнопол\S*\s*|неравнопол\S*\s*)?${N}x${N}(?:x${N})?`)))) {
     const [a, b, c] = [f(m[1]), f(m[2]), m[3] ? f(m[3]) : NaN]
     const equal = Number.isNaN(c) || a === b
     const thick = Number.isNaN(c) ? b : c
@@ -78,9 +78,14 @@ export function parseProfile(text: string): ProfileSpec | null {
   }
 
   // Полоса «-10x200» (толщина × ширина) или «Полоса 40х4»
-  if ((m = t.match(new RegExp(String.raw`^[-–—]\s*${N}x${N}`)))) {
+  if ((m = t.match(new RegExp(String.raw`(?:^|\s)[-–—]\s*${N}x${N}`)))) {
     const [x, y] = [f(m[1]), f(m[2])]
     return { type: 'strip', a: Math.max(x, y), s: Math.min(x, y) }
+  }
+  // Плита/лист в КМ-ведомостях: «-12» — только толщина
+  if ((m = t.match(new RegExp(String.raw`(?:^|\s)[-–—]\s*${N}$`)))) {
+    const s = f(m[1])
+    if (s > 0 && s <= 160) return { type: 'sheet', s }
   }
   if ((m = t.match(new RegExp(String.raw`полос\S*\s*(?:г\/к\s*)?${N}x${N}`)))) {
     const [x, y] = [f(m[1]), f(m[2])]
