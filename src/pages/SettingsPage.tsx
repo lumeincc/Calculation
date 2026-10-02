@@ -1,5 +1,7 @@
 import { Download, Trash2, Upload } from 'lucide-react'
 import { useRef } from 'react'
+import { useNavigate } from 'react-router'
+import { resetTour } from '@/components/home/tourState'
 import { Button } from '@/components/ui/Button'
 import { Field, NumberInput, Segmented, TextInput } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/misc'
@@ -35,6 +37,7 @@ const SIGNER_FIELDS: [keyof Company, string, string][] = [
 export function SettingsPage() {
   const { theme, setTheme, company, setCompany, estimateDefaults: d, setEstimateDefaults } = useSettings()
   const fileRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate()
   return (
     <div className="max-w-3xl">
       <PageHeader title={T('Настройки')} />
@@ -75,6 +78,9 @@ export function SettingsPage() {
           <h2 className="mb-4 font-semibold">{T('Оформление')}</h2>
           <Field label={T('Тема')}>
             <Segmented value={theme} onChange={(v) => setTheme(v as Theme)} options={[{ value: 'light', label: T('Светлая') }, { value: 'system', label: T('Как в системе') }, { value: 'dark', label: T('Тёмная') }]} />
+          </Field>
+          <Field label={T('Подсказки')}>
+            <Button onClick={() => { resetTour(); navigate('/') }}>{T('Показать знакомство с сайтом ещё раз')}</Button>
           </Field>
           <Field label={T('Язык')}>
             <Segmented value={lang} onChange={(v) => v !== lang && setLang(v as Lang)} options={LANGS.map((l) => ({ value: l.value, label: l.label }))} />

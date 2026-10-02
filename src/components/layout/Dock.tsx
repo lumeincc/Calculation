@@ -9,8 +9,8 @@ import { BACK_TO_MAIN, BOTTOM_NAV, isOffice, MAIN_NAV, OFFICE_ENTRY, OFFICE_NAV 
 import { TonnaLogo } from './TonnaLogo'
 import { T } from '@/i18n'
 
-function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
-  label: string; icon: LucideIcon; active?: boolean; badge?: number; dot?: string; onClick?: () => void; to?: string; end?: boolean
+function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end, tour }: {
+  label: string; icon: LucideIcon; active?: boolean; badge?: number; dot?: string; onClick?: () => void; to?: string; end?: boolean; tour?: string
 }) {
   const inner = (isActive: boolean) => (
     <div className="group relative flex h-11 w-11 items-center justify-center">
@@ -34,7 +34,7 @@ function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
   )
   if (to)
     return (
-      <NavLink to={to} end={end} aria-label={label} className="relative flex items-center">
+      <NavLink to={to} end={end} aria-label={label} data-tour={tour ?? to} className="relative flex items-center">
         {({ isActive }) => (
           <>
             {isActive && <span className="absolute -left-2.5 h-1.5 w-1.5 rounded-full bg-zinc-900 dark:bg-white" />}
@@ -44,7 +44,7 @@ function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
       </NavLink>
     )
   return (
-    <button type="button" aria-label={label} onClick={onClick} className="flex items-center">
+    <button type="button" aria-label={label} data-tour={tour} onClick={onClick} className="flex items-center">
       {inner(Boolean(active))}
     </button>
   )
@@ -68,7 +68,7 @@ export function Dock({ onSearch }: { onSearch(): void }) {
           <TonnaLogo className="h-11 w-auto" />
           {office && <span className="mt-1 text-[9px] font-bold tracking-[0.18em]">DOCS</span>}
         </NavLink>
-        <Tile label={T('Поиск (Ctrl K)')} icon={Search} onClick={onSearch} />
+        <Tile label={T('Поиск (Ctrl K)')} icon={Search} onClick={onSearch} tour="search" />
         {divider}
         {(office ? OFFICE_NAV : MAIN_NAV).map((n) => (
           <Tile key={n.to} to={n.to} end={n.end} label={n.label} icon={n.icon} badge={counts[n.to]} />

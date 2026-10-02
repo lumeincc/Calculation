@@ -1,46 +1,29 @@
-import { ArrowRight, Calculator, FileArchive, FileSpreadsheet, FolderOpen, Plus, Weight } from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
+import { ArrowRight, Calculator, FileArchive, FileSpreadsheet } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router'
 import { CALCULATORS, CATEGORIES } from '@/calculators/registry'
 import { CalculatorCard } from '@/components/calculator/CalculatorCard'
-import { Button, ButtonLink } from '@/components/ui/Button'
+import { Hero } from '@/components/home/Hero'
+import { Recommendations } from '@/components/home/Recommendations'
+import { Tour } from '@/components/home/Tour'
+import { tourDone } from '@/components/home/tourState'
 import { computeTotals } from '@/lib/estimate'
 import { fmtDateTime, money } from '@/lib/format'
 import { useEstimates } from '@/store/estimates'
-import { useSettings } from '@/store/settings'
 import { T } from '@/i18n'
 
 const POPULAR = ['metal', 'concrete', 'rebar', 'masonry', 'bulk', 'roof']
 
 export function HomePage() {
   const estimates = useEstimates((s) => s.estimates)
-  const create = useEstimates((s) => s.create)
-  const defaults = useSettings((s) => s.estimateDefaults)
-  const navigate = useNavigate()
+  const [tour, setTour] = useState(() => !tourDone())
   const recent = [...estimates].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 4)
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white px-6 py-8 sm:px-10 sm:py-10 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="animate-glow pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl" />
-        <div className="animate-glow pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-zinc-400/10 blur-3xl [animation-delay:-4s]" />
-        <div className="stagger relative max-w-3xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{T('Расчёты материалов, тоннаж и сметы — в одном месте')}</h1>
-          <p className="mt-3 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
-            {CALCULATORS.length}  {T('строительных калькуляторов, спецификация металла по ГОСТ, сметы с НДС, накладными и выгрузкой в Excel. Загрузите архив с проектной документацией — сайт распакует его и найдёт сметы и спецификации.')}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <ButtonLink to="/docs" variant="primary">
-              <FolderOpen size={17} />  {T('Загрузить документы')}
-            </ButtonLink>
-            <Button onClick={() => navigate(`/estimates/${create(T('Новая смета'), defaults)}`)}>
-              <Plus size={17} />  {T('Новая смета')}
-            </Button>
-            <ButtonLink to="/calc/metal">
-              <Weight size={17} />  {T('Тоннаж металла')}
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
+      {tour && <Tour onClose={() => setTour(false)} />}
+      <Hero />
+      <Recommendations />
 
       <section className="stagger grid gap-4 md:grid-cols-3">
         {[
