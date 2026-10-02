@@ -175,6 +175,13 @@
   .stagger > :nth-child(15) { animation-delay: 630ms; }
   .stagger > :nth-child(n + 16) { animation-delay: 650ms; }
 
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .lift {
     @apply transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-zinc-900/5 dark:hover:shadow-black/30;
   }

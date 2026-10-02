@@ -1,8 +1,11 @@
-import { Check, Cloud, CloudOff, Copy, LogOut, RefreshCw, Server, Trash2, UserRound, Users } from 'lucide-react'
+import {
+  ArrowRight, Building2, Check, ChevronDown, CircleAlert, Cloud, CloudOff, Copy, Eye, EyeOff, FileSpreadsheet, KeyRound, Loader2, Lock,
+  LogOut, Mail, RefreshCw, Server, ShieldCheck, Tags, Trash2, UserRound, Users,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button, IconButton } from '@/components/ui/Button'
 import { Field, TextInput } from '@/components/ui/Field'
-import { Badge, PageHeader, Tabs } from '@/components/ui/misc'
+import { Badge, PageHeader } from '@/components/ui/misc'
 import { apiFetch, ApiError } from '@/lib/api'
 import { fmtDateTime } from '@/lib/format'
 import { resetSyncData, startSync, stopSync, syncNow, useSyncStatus } from '@/lib/sync'
@@ -37,13 +40,35 @@ function ServerField() {
   )
 }
 
+const MODES: { value: Mode; label: string; title: string; text: string; button: string }[] = [
+  { value: 'login', label: 'Вход', title: 'С возвращением', text: 'Войдите, чтобы открыть сметы и справочники компании.', button: 'Войти' },
+  { value: 'register', label: 'Регистрация', title: 'Регистрация компании', text: 'Создайте пространство компании и пригласите сотрудников.', button: 'Создать компанию' },
+  { value: 'join', label: 'По коду', title: 'Присоединиться к компании', text: 'Введите код, который выдал владелец компании.', button: 'Присоединиться' },
+]
+
+function IconInput({ icon: Icon, id, type = 'text', right, ...rest }: React.InputHTMLAttributes<HTMLInputElement> & { icon: typeof Mail; id: string; right?: React.ReactNode }) {
+  return (
+    <div className="group relative">
+      <Icon size={17} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-zinc-400 transition group-focus-within:text-zinc-900 dark:group-focus-within:text-white" />
+      <input id={id} type={type} className={`input h-11 rounded-xl pl-10 ${right ? 'pr-11' : ''}`} {...rest} />
+      {right && <div className="absolute inset-y-0 right-1.5 flex items-center">{right}</div>}
+    </div>
+  )
+}
+
 function AuthForm() {
   const { login, register } = useAuth()
   const [mode, setMode] = useState<Mode>('login')
   const [f, setF] = useState({ email: '', password: '', name: '', company: '', invite: '' })
   const [busy, setBusy] = useState(false)
+  const [show, setShow] = useState(false)
   const [error, setError] = useState('')
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value })
+  const m = MODES.find((x) => x.value === mode)!
+  const switchTo = (v: Mode) => {
+    setMode(v)
+    setError('')
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,45 +86,129 @@ function AuthForm() {
     }
   }
 
+  const label = (id: string, text: string) => (
+    <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">{text}</label>
+  )
+
   return (
-    <div className="mx-auto max-w-md">
-      <div className="card p-6">
-        <Tabs<Mode> value={mode} onChange={(m) => { setMode(m); setError('') }} tabs={[{ value: 'login', label: 'Вход' }, { value: 'register', label: 'Новая компания' }, { value: 'join', label: 'По приглашению' }]} />
-        <form onSubmit={submit} className="mt-5 space-y-4">
-          {mode === 'join' && (
-            <Field htmlFor="acc-invite" label="Код приглашения" hint="Его выдаёт владелец компании на этой странице">
-              <TextInput id="acc-invite" value={f.invite} onChange={set('invite')} placeholder="ABCD-1234" required className="uppercase" />
-            </Field>
-          )}
-          {mode === 'register' && (
-            <Field htmlFor="acc-company" label="Название компании">
-              <TextInput id="acc-company" value={f.company} onChange={set('company')} placeholder="ТОО «Каскад»" required />
-            </Field>
-          )}
-          {mode !== 'login' && (
-            <Field htmlFor="acc-name" label="Ваше имя">
-              <TextInput id="acc-name" value={f.name} onChange={set('name')} placeholder="Имя Фамилия" required />
-            </Field>
-          )}
-          <Field htmlFor="acc-email" label="E-mail">
-            <TextInput id="acc-email" type="email" autoComplete="email" value={f.email} onChange={set('email')} required />
-          </Field>
-          <Field htmlFor="acc-password" label="Пароль" hint={mode !== 'login' ? 'Не короче 8 символов' : undefined}>
-            <TextInput id="acc-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={f.password} onChange={set('password')} minLength={mode === 'login' ? undefined : 8} required />
-          </Field>
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>}
-          <Button type="submit" variant="primary" className="w-full" disabled={busy}>
-            {mode === 'login' ? 'Войти' : mode === 'register' ? 'Создать компанию' : 'Присоединиться'}
-          </Button>
-        </form>
-      </div>
-      <details className="mt-4 text-sm">
-        <summary className="cursor-pointer text-zinc-500">Настройки подключения</summary>
-        <div className="mt-3">
-          <ServerField />
+    <div className="mx-auto grid max-w-5xl items-center gap-10 py-4 lg:min-h-[calc(100dvh-8rem)] lg:grid-cols-[1fr_440px]">
+      <div className="stagger hidden lg:block">
+        <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-lg dark:bg-white dark:text-zinc-900">
+          <Cloud size={24} />
         </div>
-      </details>
-      <p className="mt-6 text-center text-xs text-zinc-500">Без входа сайт работает как раньше — данные хранятся только в этом браузере.</p>
+        <h1 className="text-4xl font-semibold tracking-tight text-balance">Работайте над сметами всей командой</h1>
+        <p className="mt-3 max-w-md text-zinc-600 dark:text-zinc-400">Один аккаунт компании — общие сметы, цены и реквизиты на любом компьютере и телефоне.</p>
+        <ul className="mt-8 space-y-4">
+          {[
+            { icon: FileSpreadsheet, title: 'Общие сметы', text: 'Сотрудники видят и правят одни и те же сметы, изменения приходят за секунды.' },
+            { icon: Tags, title: 'Единый справочник цен', text: 'Цены и реквизиты компании задаются один раз и подставляются у всех.' },
+            { icon: ShieldCheck, title: 'Ничего не теряется', text: 'Если двое правили одну смету, вторая версия сохраняется копией.' },
+          ].map((b) => (
+            <li key={b.title} className="flex gap-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"><b.icon size={18} /></span>
+              <span>
+                <span className="block font-medium">{b.title}</span>
+                <span className="block text-sm text-zinc-600 dark:text-zinc-400">{b.text}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="animate-fade-up">
+        <div className="rounded-3xl border border-zinc-200 bg-white p-7 shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+          <div className="mb-6 flex rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800/80" role="tablist">
+            {MODES.map((x) => (
+              <button
+                key={x.value}
+                type="button"
+                role="tab"
+                aria-selected={mode === x.value}
+                onClick={() => switchTo(x.value)}
+                className={`flex-1 rounded-lg px-2 py-2 text-[13px] font-medium transition ${mode === x.value ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-white' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
+
+          <div key={mode} className="animate-fade-up">
+            <h2 className="text-2xl font-semibold tracking-tight">{m.title}</h2>
+            <p className="mt-1 mb-6 text-sm text-zinc-500">{m.text}</p>
+
+            <form onSubmit={submit} className="space-y-4">
+              {mode === 'join' && (
+                <div>
+                  {label('acc-invite', 'Код приглашения')}
+                  <IconInput icon={KeyRound} id="acc-invite" value={f.invite} onChange={set('invite')} placeholder="ABCD-1234" required className="input h-11 rounded-xl pl-10 font-mono tracking-widest uppercase" />
+                </div>
+              )}
+              {mode === 'register' && (
+                <div>
+                  {label('acc-company', 'Название компании')}
+                  <IconInput icon={Building2} id="acc-company" value={f.company} onChange={set('company')} placeholder="ТОО «Каскад»" required />
+                </div>
+              )}
+              {mode !== 'login' && (
+                <div>
+                  {label('acc-name', 'Ваше имя')}
+                  <IconInput icon={UserRound} id="acc-name" value={f.name} onChange={set('name')} placeholder="Имя Фамилия" autoComplete="name" required />
+                </div>
+              )}
+              <div>
+                {label('acc-email', 'E-mail')}
+                <IconInput icon={Mail} id="acc-email" type="email" autoComplete="email" value={f.email} onChange={set('email')} placeholder="name@company.kz" required />
+              </div>
+              <div>
+                {label('acc-password', 'Пароль')}
+                <IconInput
+                  icon={Lock}
+                  id="acc-password"
+                  type={show ? 'text' : 'password'}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  value={f.password}
+                  onChange={set('password')}
+                  minLength={mode === 'login' ? undefined : 8}
+                  placeholder={mode === 'login' ? '••••••••' : 'Не короче 8 символов'}
+                  required
+                  right={
+                    <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? 'Скрыть пароль' : 'Показать пароль'} className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
+                      {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  }
+                />
+              </div>
+              {error && (
+                <p className="animate-fade-up flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                  <CircleAlert size={16} className="mt-0.5 shrink-0" /> {error}
+                </p>
+              )}
+              <Button type="submit" variant="primary" className="h-11 w-full rounded-xl text-[15px]" disabled={busy}>
+                {busy ? <Loader2 size={17} className="animate-spin" /> : <>{m.button} <ArrowRight size={16} /></>}
+              </Button>
+            </form>
+
+            <p className="mt-5 text-center text-sm text-zinc-500">
+              {mode === 'login' ? (
+                <>Нет аккаунта? <button type="button" onClick={() => switchTo('register')} className="font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-white">Создать компанию</button></>
+              ) : (
+                <>Уже есть аккаунт? <button type="button" onClick={() => switchTo('login')} className="font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-white">Войти</button></>
+              )}
+            </p>
+          </div>
+        </div>
+
+        <details className="group mt-4 px-2 text-sm">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">
+            <Server size={14} /> Настройки подключения
+            <ChevronDown size={14} className="transition group-open:rotate-180" />
+          </summary>
+          <div className="mt-3">
+            <ServerField />
+          </div>
+        </details>
+        <p className="mt-4 px-2 text-xs text-zinc-400">Без входа сайт тоже работает — данные хранятся только в этом браузере.</p>
+      </div>
     </div>
   )
 }
@@ -211,10 +320,11 @@ function Workspace() {
 
 export function AccountPage() {
   const token = useAuth((s) => s.token)
+  if (!token) return <AuthForm />
   return (
     <div>
       <PageHeader icon={<Cloud size={22} />} title="Аккаунт и команда" subtitle="Общие сметы и справочники для всей компании, доступ с любого устройства." />
-      {token ? <Workspace /> : <AuthForm />}
+      <Workspace />
     </div>
   )
 }
