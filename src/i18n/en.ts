@@ -1885,7 +1885,6 @@ export const en: Record<string, string> = {
   "Сделайте резервную копию": "Make a backup",
   "Сметы хранятся в браузере — сохраните копию файлом в настройках.": "Estimates are stored in the browser — save a backup file in Settings.",
   "Совет": "Tip",
-  "Тоннаж · сметы · документы": "Tonnage · estimates · documents",
   "Черновой — с отходами на раскрой. По нему удобно заказывать металл.": "Gross includes cutting waste — handy for ordering metal.",
   "Чистовой и черновой вес": "Net and gross weight",
   "Язык и тема переключаются в настройках.": "Language and theme are switched in Settings.",

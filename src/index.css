@@ -69,8 +69,8 @@
   }
   /* Soft breathing light around the hero logo. */
   @keyframes logo-glow {
-    0%, 100% { filter: drop-shadow(0 0 14px rgb(255 255 255 / 0.28)) drop-shadow(0 0 42px rgb(249 115 22 / 0.18)); }
-    50% { filter: drop-shadow(0 0 22px rgb(255 255 255 / 0.45)) drop-shadow(0 0 70px rgb(249 115 22 / 0.32)); }
+    0%, 100% { filter: drop-shadow(0 0 16px rgb(255 255 255 / 0.45)) drop-shadow(0 0 48px rgb(255 255 255 / 0.25)); }
+    50% { filter: drop-shadow(0 0 26px rgb(255 255 255 / 0.7)) drop-shadow(0 0 80px rgb(255 255 255 / 0.4)); }
   }
   @keyframes halo {
     0%, 100% { opacity: 0.55; transform: scale(1); }
@@ -243,7 +243,7 @@ a.btn-press:active {
   }
 }
 
-/* Recommendation cards: a light spot follows the cursor. */
+/* Recommendation cards: a green light spot follows the cursor. */
 .spot {
   position: relative;
   isolation: isolate;
@@ -256,10 +256,15 @@ a.btn-press:active {
   border-radius: inherit;
   opacity: 0;
   transition: opacity 0.25s;
-  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgb(249 115 22 / 0.13), transparent 70%);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(34 197 94 / 0.16), transparent 70%);
 }
 .spot:hover::before {
   opacity: 1;
+}
+/* Green glow around the card on hover. */
+.spot:hover {
+  border-color: rgb(34 197 94 / 0.55);
+  box-shadow: 0 0 0 1px rgb(34 197 94 / 0.25), 0 0 28px rgb(34 197 94 / 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {
