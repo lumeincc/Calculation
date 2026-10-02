@@ -1,14 +1,13 @@
 import {
-  Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Monitor, Moon, Search, Settings, Sun, Tags, Weight, type LucideIcon,
+  Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Search, Settings, Tags, Weight, type LucideIcon,
 } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router'
 import { useSyncStatus } from '@/lib/sync'
 import { useAuth } from '@/store/auth'
 import { useDocs } from '@/store/docs'
 import { useEstimates } from '@/store/estimates'
-import { useSettings, type Theme } from '@/store/settings'
 import { TonnaLogo } from './TonnaLogo'
-import { LANGS, lang, setLang, T } from '@/i18n'
+import { T } from '@/i18n'
 
 const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: '/', label: T('Главная'), icon: Home, end: true },
@@ -22,12 +21,6 @@ const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
 const BOTTOM = [
   { to: '/account', label: T('Аккаунт и команда'), icon: CircleUserRound },
   { to: '/settings', label: T('Настройки'), icon: Settings },
-]
-
-const THEMES: { v: Theme; icon: LucideIcon; label: string }[] = [
-  { v: 'light', icon: Sun, label: T('Тема: светлая') },
-  { v: 'dark', icon: Moon, label: T('Тема: тёмная') },
-  { v: 'system', icon: Monitor, label: T('Тема: как в системе') },
 ]
 
 function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
@@ -71,31 +64,13 @@ function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
   )
 }
 
-function LangTile() {
-  const next = LANGS[(LANGS.findIndex((l) => l.value === lang) + 1) % LANGS.length]
-  const cur = LANGS.find((l) => l.value === lang) ?? LANGS[0]
-  return (
-    <button type="button" aria-label={next.label} onClick={() => setLang(next.value)} className="group relative flex h-11 w-11 items-center justify-center">
-      <span className="flex h-full w-full items-center justify-center rounded-[14px] border border-zinc-200/80 bg-white text-[13px] font-semibold tracking-wide text-zinc-700 shadow-sm hover:text-zinc-950 dark:border-zinc-700/80 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:text-white">
-        {cur.short}
-      </span>
-      <span className="pointer-events-none absolute top-1/2 left-full ml-4 hidden -translate-y-1/2 rounded-lg bg-zinc-900 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg group-hover:block dark:bg-white dark:text-zinc-900">
-        {next.label}
-      </span>
-    </button>
-  )
-}
-
 export function Dock({ onSearch }: { onSearch(): void }) {
   const estimates = useEstimates((s) => s.estimates.length)
   const docs = useDocs((s) => s.files.filter((f) => f.kind !== 'archive').length)
-  const theme = useSettings((s) => s.theme)
-  const setTheme = useSettings((s) => s.setTheme)
   const loggedIn = useAuth((s) => Boolean(s.token))
   const sync = useSyncStatus((s) => s.status)
   useLocation() // re-render on navigation so the active tile updates
   const counts: Record<string, number> = { '/estimates': estimates, '/docs': docs }
-  const t = THEMES.find((x) => x.v === theme) ?? THEMES[2]
   const syncDot = !loggedIn ? undefined : sync === 'error' ? 'bg-red-500' : sync === 'offline' ? 'bg-amber-500' : 'bg-emerald-500'
 
   return (
@@ -115,12 +90,6 @@ export function Dock({ onSearch }: { onSearch(): void }) {
         {BOTTOM.map((n) => (
           <Tile key={n.to} to={n.to} label={n.label} icon={n.icon} dot={n.to === '/account' ? syncDot : undefined} />
         ))}
-        <Tile
-          label={t.label}
-          icon={t.icon}
-          onClick={() => setTheme(THEMES[(THEMES.indexOf(t) + 1) % THEMES.length].v)}
-        />
-        <LangTile />
       </nav>
     </aside>
   )
