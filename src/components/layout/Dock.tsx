@@ -83,7 +83,7 @@ export function Dock({ onSearch }: { onSearch(): void }) {
 
   return (
     <aside
-      className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-start pt-6 lg:flex"
+      className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-center lg:flex"
     >
       <nav className="mx-auto flex w-[64px] flex-col items-center gap-2 rounded-[22px] border border-zinc-200/70 bg-white/60 py-3 shadow-xl shadow-zinc-900/5 backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-900/60 dark:shadow-black/40">
         <Tile label="Поиск (Ctrl K)" icon={Search} onClick={onSearch} />

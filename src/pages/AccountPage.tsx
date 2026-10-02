@@ -91,7 +91,7 @@ function AuthForm() {
   )
 
   return (
-    <div className="mx-auto grid max-w-5xl items-center gap-10 py-4 lg:min-h-[calc(100dvh-8rem)] lg:grid-cols-[1fr_440px]">
+    <div className="mx-auto grid max-w-5xl items-center gap-10 py-4 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[1fr_440px] lg:py-0">
       <div className="stagger hidden lg:block">
         <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-lg dark:bg-white dark:text-zinc-900">
           <Cloud size={24} />
@@ -115,7 +115,7 @@ function AuthForm() {
         </ul>
       </div>
 
-      <div className="animate-fade-up">
+      <div className="animate-fade-up relative">
         <div className="rounded-3xl border border-zinc-200 bg-white p-7 shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
           <div className="mb-6 flex rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800/80" role="tablist">
             {MODES.map((x) => (
@@ -198,6 +198,7 @@ function AuthForm() {
           </div>
         </div>
 
+        <div className="lg:absolute lg:inset-x-0 lg:top-full">
         <details className="group mt-4 px-2 text-sm">
           <summary className="flex cursor-pointer list-none items-center gap-1.5 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">
             <Server size={14} /> Настройки подключения
@@ -208,6 +209,7 @@ function AuthForm() {
           </div>
         </details>
         <p className="mt-4 px-2 text-xs text-zinc-400">Без входа сайт тоже работает — данные хранятся только в этом браузере.</p>
+        </div>
       </div>
     </div>
   )
