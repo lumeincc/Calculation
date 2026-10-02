@@ -34,7 +34,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
           className={({ isActive }) =>
             `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
               isActive
-                ? 'bg-brand-50 text-brand-800 dark:bg-brand-950/60 dark:text-brand-200'
+                ? 'bg-brand-50 text-brand-800 dark:bg-brand-950/60 dark:text-white'
                 : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100'
             }`
           }
@@ -124,7 +124,6 @@ export function Layout() {
         <NavItems />
         <div className="mt-auto space-y-3 px-1">
           <ThemeSwitch />
-          <p className="px-1 text-[11px] leading-relaxed text-zinc-400">Данные хранятся только в вашем браузере. Документы обрабатываются локально и никуда не отправляются.</p>
         </div>
       </aside>
 

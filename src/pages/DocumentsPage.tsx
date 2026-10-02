@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
+import { MetalCostPanel } from '@/components/calculator/MetalCostPanel'
 import { Dropzone } from '@/components/docs/Dropzone'
 import { DocViewer, TableView } from '@/components/docs/Viewers'
 import { AddToEstimateDialog } from '@/components/estimate/AddToEstimateDialog'
@@ -16,7 +17,7 @@ import type { DocFile, DocKind, MetalHit, Position } from '@/docs/types'
 import { createItem, createSection, KIND_LABEL, type EstimateItem } from '@/lib/estimate'
 import { downloadBytes, exportTableXlsx } from '@/lib/export'
 import { fmt, money, plural } from '@/lib/format'
-import { PROFILE_PRICE_KEY } from '@/lib/metal'
+import { paintArea, priceGroupOf, PROFILE_PRICE_KEY } from '@/lib/metal'
 import { round } from '@/lib/num'
 import { useDocs } from '@/store/docs'
 import { useEstimates } from '@/store/estimates'
@@ -147,6 +148,10 @@ export function DocumentsPage() {
   const activeExtras = extraSel ?? new Set(extras.map((x) => x.fileId))
   const extraKg = extras.filter((x) => activeExtras.has(x.fileId)).reduce((s, x) => s + x.kg, 0)
   const metalKg = profileKg + extraKg
+  const costItems = useMemo(
+    () => metal.filter((h) => (h.massKg ?? 0) > 0).map((h) => ({ group: priceGroupOf(h.profile.type), massKg: h.massKg!, areaM2: paintArea(h.profile, h.massKg!) })),
+    [metal],
+  )
   const unknownMass = metal.filter((h) => h.massKg === null).length
   const selectedPositions = checked ?? new Set(positions.map((p) => p.id))
   const selected = selectedId ? byId.get(selectedId) : undefined
@@ -216,6 +221,7 @@ export function DocumentsPage() {
           length: h.kgPerM > 0 ? round(h.massKg! / h.kgPerM, 3) : 0,
           count: 1,
           massKg: h.massKg!,
+          profile: h.profile,
           source: byId.get(h.fileId)?.name,
         })),
     )
@@ -536,6 +542,7 @@ export function DocumentsPage() {
                   <Download size={16} /> Excel
                 </Button>
               </div>
+              <MetalCostPanel items={costItems} extraKg={extraKg} title={`Металлоконструкции: ${docs.find((d) => activeSources.has(d.id))?.name.replace(/\.(xlsx?|xls\.xlsx|pdf|csv)$/i, '') ?? 'проект'}`} />
               <div className="card overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
                   <thead className="bg-zinc-50 text-left text-xs text-zinc-500 dark:bg-zinc-900/60">
@@ -606,5 +613,5 @@ export function DocumentsPage() {
 
 function Highlight({ text, q }: { text: string; q: string }) {
   const parts = text.split(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
-  return <>{parts.map((p, i) => (p.toLowerCase() === q.toLowerCase() ? <mark key={i} className="rounded bg-brand-200 px-0.5 text-zinc-900">{p}</mark> : p))}</>
+  return <>{parts.map((p, i) => (p.toLowerCase() === q.toLowerCase() ? <mark key={i} className="rounded bg-accent-200 px-0.5 text-zinc-900">{p}</mark> : p))}</>
 }

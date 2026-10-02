@@ -7,7 +7,7 @@ type Size = 'sm' | 'md'
 const base =
   'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition select-none disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap'
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800',
+  primary: 'bg-brand-600 text-brand-fg shadow-sm hover:bg-brand-700 active:bg-brand-800',
   secondary:
     'border border-zinc-300 bg-white text-zinc-800 shadow-xs hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800',
   ghost: 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800',

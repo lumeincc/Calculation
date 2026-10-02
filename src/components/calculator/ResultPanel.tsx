@@ -67,9 +67,9 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
       {primary.length > 0 && (
         <div className="stagger grid grid-cols-2 gap-3 xl:grid-cols-3">
           {primary.map((m, i) => (
-            <div key={m.label} className={`lift rounded-xl border p-3.5 ${i === 0 ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
+            <div key={m.label} className={`lift rounded-xl border p-3.5 ${i === 0 ? 'border-accent-200 bg-accent-50 dark:border-accent-900 dark:bg-accent-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
               <div className="text-xs leading-snug font-medium text-zinc-500 dark:text-zinc-400">{m.label}</div>
-              <div className="mt-1 text-xl font-semibold tracking-tight">
+              <div className={`mt-1 text-xl font-semibold tracking-tight ${i === 0 ? 'text-accent-700 dark:text-accent-300' : ''}`}>
                 <MetricValue value={m.value} digits={m.digits} unit={m.unit} />
               </div>
               {m.hint && <div className="mt-0.5 text-xs text-zinc-500">{m.hint}</div>}

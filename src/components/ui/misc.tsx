@@ -96,10 +96,10 @@ export function Tabs<T extends string>({ value, onChange, tabs }: { value: T; on
 
 export function Stat({ label, value, unit, hint, accent }: { label: ReactNode; value: ReactNode; unit?: ReactNode; hint?: ReactNode; accent?: boolean }) {
   return (
-    <div className={`lift rounded-xl border p-4 ${accent ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
+    <div className={`lift rounded-xl border p-4 ${accent ? 'border-accent-200 bg-accent-50 dark:border-accent-900 dark:bg-accent-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
       <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</div>
       <div className="mt-1 flex items-baseline gap-1.5">
-        <span className="text-2xl font-semibold tracking-tight tabular-nums">{typeof value === 'number' ? <AnimatedNumber value={value} digits={0} /> : value}</span>
+        <span className={`text-2xl font-semibold tracking-tight tabular-nums ${accent ? 'text-accent-700 dark:text-accent-300' : ''}`}>{typeof value === 'number' ? <AnimatedNumber value={value} digits={0} /> : value}</span>
         {unit && <span className="text-sm text-zinc-500">{unit}</span>}
       </div>
       {hint && <div className="mt-0.5 text-xs text-zinc-500">{hint}</div>}

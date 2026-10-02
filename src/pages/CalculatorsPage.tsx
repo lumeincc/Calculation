@@ -62,7 +62,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick(): void;
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition ${
         active
-          ? 'border-brand-600 bg-brand-600 text-white'
+          ? 'border-brand-600 bg-brand-600 text-brand-fg'
           : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700'
       }`}
     >

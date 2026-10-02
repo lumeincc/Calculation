@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { uid } from '@/lib/id'
+import type { ProfileSpec } from '@/lib/metal'
 
 export interface SpecRow {
   id: string
@@ -11,6 +12,8 @@ export interface SpecRow {
   length: number
   count: number
   massKg: number
+  /** Section, for painting area and price groups (absent in rows saved by older versions). */
+  profile?: ProfileSpec
   /** Where the row came from: calculator or a document name. */
   source?: string
 }

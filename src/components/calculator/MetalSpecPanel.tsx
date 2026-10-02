@@ -8,7 +8,8 @@ import { NumberInput } from '@/components/ui/Field'
 import { EmptyState } from '@/components/ui/misc'
 import { exportTableXlsx } from '@/lib/export'
 import { fmt, money } from '@/lib/format'
-import { PROFILE_LABEL, PROFILE_PRICE_KEY } from '@/lib/metal'
+import { paintArea, PROFILE_LABEL, PROFILE_PRICE_KEY, priceGroupOf, type ProfileType } from '@/lib/metal'
+import { MetalCostPanel } from './MetalCostPanel'
 import { round } from '@/lib/num'
 import { useMetalSpec, type SpecRow } from '@/store/metalSpec'
 import { priceOf, usePrices } from '@/store/prices'
@@ -36,6 +37,15 @@ export function MetalSpecPanel({ values }: ExtraProps<MetalValues>) {
     }
     return [...m.entries()].sort((a, b) => b[1] - a[1])
   }, [rows])
+
+  const costItems = useMemo(
+    () =>
+      rows.map((r) => {
+        const type = (r.profile?.type ?? Object.entries(PROFILE_PRICE_KEY).find(([, k]) => k === r.priceKey)?.[0] ?? 'profilePipe') as ProfileType
+        return { group: priceGroupOf(type), massKg: r.massKg, areaM2: r.profile ? paintArea(r.profile, r.massKg) : 0 }
+      }),
+    [rows],
+  )
 
   const update = (r: SpecRow, p: Partial<SpecRow>) => {
     const next = { ...r, ...p }
@@ -150,6 +160,11 @@ export function MetalSpecPanel({ values }: ExtraProps<MetalValues>) {
             </div>
           </div>
         </>
+      )}
+      {rows.length > 0 && (
+        <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+          <MetalCostPanel items={costItems} title="Металлоконструкции по спецификации" />
+        </div>
       )}
       {dialog && (
         <AddToEstimateDialog

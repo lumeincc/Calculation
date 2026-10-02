@@ -2,7 +2,7 @@
  * Mass of rolled-metal items. Shared by the metal calculator, the fence calculator and the
  * document analyser (which recognises profiles in specifications).
  */
-import { ANGLES_EQUAL, BEAMS, CHANNELS, METAL_MATERIALS, STEEL_DENSITY, geo, rebarKgPerM } from '@/data/metals'
+import { ANGLES_EQUAL, BEAM_HB, BEAMS, CHANNEL_B, CHANNELS, METAL_MATERIALS, STEEL_DENSITY, geo, rebarKgPerM } from '@/data/metals'
 import { pos } from './num'
 
 export type ProfileType =
@@ -108,5 +108,70 @@ export function profileName(p: ProfileSpec): string {
     case 'beam': return `${label} ${p.size ?? ''}`.trim()
     case 'rebar': return `${label} ⌀${a}`
     case 'custom': return `${label} (${fmtDim(pos(p.kgPerM))} кг/м)`
+  }
+}
+
+/**
+ * Painted surface per metre of profile, m²/m (outer perimeter). For sheets — m² per m² of sheet
+ * (both faces). Fillets and inner pipe surfaces are ignored, as in usual painting estimates.
+ */
+export function paintPerMetre(p: ProfileSpec): number {
+  const a = pos(p.a) / 1000, b = (pos(p.b) || pos(p.a)) / 1000, s = pos(p.s) / 1000
+  switch (p.type) {
+    case 'sheet': return 2
+    case 'round':
+    case 'rebar': return Math.PI * a
+    case 'square': return 4 * a
+    case 'hex': return (6 * a) / Math.sqrt(3)
+    case 'strip': return 2 * (a + s)
+    case 'pipe': return Math.PI * a
+    case 'profilePipe': return 2 * (a + b)
+    case 'angle': {
+      if (p.size) {
+        const [leg] = p.size.split('×').map((x) => Number(x.replace(',', '.')) / 1000)
+        return 4 * leg
+      }
+      return 2 * (a + b)
+    }
+    case 'channel': {
+      // №10 → h = 100 mm
+      const n = Number((p.size ?? '').replace('№', '').replace(',', '.')) * 0.01
+      return 2 * n + 4 * ((CHANNEL_B[p.size ?? ''] ?? 0) / 1000)
+    }
+    case 'beam': {
+      const [h, w] = BEAM_HB[p.size ?? ''] ?? [0, 0]
+      return 2 * (h / 1000) + 4 * (w / 1000)
+    }
+    case 'custom': return 0
+  }
+}
+
+/** Painted area for a given mass of a profile, m². */
+export function paintArea(p: ProfileSpec, massKg: number): number {
+  const k = kgPerMetre(p)
+  return k > 0 ? (massKg / k) * paintPerMetre(p) : 0
+}
+
+/** Price groups used when metal prices are entered per project. */
+export type MetalPriceGroup = 'profilePipe' | 'pipe' | 'angle' | 'channel' | 'beam' | 'sheet' | 'round' | 'rebar'
+
+export const PRICE_GROUP_LABEL: Record<MetalPriceGroup, string> = {
+  profilePipe: 'Труба профильная',
+  pipe: 'Труба круглая',
+  angle: 'Уголок',
+  channel: 'Швеллер',
+  beam: 'Двутавр',
+  sheet: 'Лист и полоса',
+  round: 'Круг, квадрат, шестигранник',
+  rebar: 'Арматура',
+}
+
+export function priceGroupOf(type: ProfileType): MetalPriceGroup {
+  switch (type) {
+    case 'strip': return 'sheet'
+    case 'square':
+    case 'hex': return 'round'
+    case 'custom': return 'profilePipe'
+    default: return type
   }
 }

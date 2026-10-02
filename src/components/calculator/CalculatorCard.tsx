@@ -5,7 +5,7 @@ import type { AnyCalculator } from '@/calculators/registry'
 export function CalculatorCard({ calc }: { calc: AnyCalculator }) {
   return (
     <Link to={`/calc/${calc.id}`} className="group card flex gap-3.5 p-4 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md dark:hover:border-brand-800">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 transition duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-brand-600 group-hover:text-white dark:bg-brand-950/60 dark:text-brand-300">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 transition duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-brand-600 group-hover:text-brand-fg dark:bg-brand-950/60 dark:text-brand-300">
         <calc.icon size={20} />
       </div>
       <div className="min-w-0 flex-1">

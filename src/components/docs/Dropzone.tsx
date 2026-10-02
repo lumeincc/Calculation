@@ -82,7 +82,7 @@ export function Dropzone({ onFiles, busy, progress, compact }: { onFiles(files: 
           <h2 className="text-lg font-semibold">Перетащите сюда файлы, папку или архив</h2>
           <p className="mt-1 max-w-xl text-sm text-zinc-500">{SUPPORTED_HINT}.</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <button onClick={() => files.current?.click()} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-brand-700">
+            <button onClick={() => files.current?.click()} className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-medium text-brand-fg shadow-sm hover:bg-brand-700">
               <UploadCloud size={17} /> Выбрать файлы
             </button>
             <button onClick={() => folder.current?.click()} className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">

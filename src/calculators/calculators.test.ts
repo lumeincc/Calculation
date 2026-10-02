@@ -176,3 +176,15 @@ describe('wood, stairs, insulation, units, fence', () => {
     expect(metric(r, 'Листов')).toBe(Math.ceil(50 / 1.15))
   })
 })
+
+describe('painting area', () => {
+  it('uses the outer perimeter of profiles', async () => {
+    const { paintPerMetre, paintArea } = await import('@/lib/metal')
+    expect(paintPerMetre({ type: 'profilePipe', a: 120, b: 120, s: 4 })).toBeCloseTo(0.48, 9)
+    expect(paintPerMetre({ type: 'angle', size: '50×5' })).toBeCloseTo(0.2, 9)
+    expect(paintPerMetre({ type: 'beam', size: '20Б1' })).toBeCloseTo(0.8, 9)
+    expect(paintPerMetre({ type: 'channel', size: '№10' })).toBeCloseTo(0.384, 9)
+    // 1 t of 10 mm plate = 12.74 m² of sheet = 25.5 m² of paint (both faces)
+    expect(paintArea({ type: 'sheet', s: 10 }, 1000)).toBeCloseTo((1000 / 78.5) * 2, 6)
+  })
+})

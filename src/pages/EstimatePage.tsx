@@ -152,7 +152,7 @@ function SectionBlock({ e, sec, start, first, last }: { e: Estimate; sec: Estima
 
 function Row({ label, value, strong, muted }: { label: React.ReactNode; value: number; strong?: boolean; muted?: boolean }) {
   return (
-    <div className={`flex items-baseline justify-between gap-3 py-1 ${strong ? 'text-base font-semibold' : 'text-sm'} ${muted ? 'text-zinc-500' : ''}`}>
+    <div className={`flex items-baseline justify-between gap-3 py-1 ${strong ? 'text-base font-semibold text-accent-700 dark:text-accent-300' : 'text-sm'} ${muted ? 'text-zinc-500' : ''}`}>
       <span>{label}</span>
       <AnimatedNumber value={value} format={money} />
     </div>

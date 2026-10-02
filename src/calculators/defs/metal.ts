@@ -11,6 +11,7 @@ export interface SpecRowInput {
   length: number
   count: number
   massKg: number
+  profile?: ProfileSpec
   source?: string
 }
 
@@ -119,10 +120,10 @@ export function specRowFromValues(v: MetalValues): SpecRowInput {
   if (v.profile === 'sheet') {
     const area = pos(v.sheetW) * pos(v.sheetL)
     // For sheets «length» is the area of one sheet and kg/m is kg/m².
-    return { name: `${profileName(spec)} ${pos(v.sheetW)}×${pos(v.sheetL)} м`, priceKey: PROFILE_PRICE_KEY.sheet, kgPerM: k, length: area, count: Math.round(pos(v.count)), massKg: k * area * Math.round(pos(v.count)), source: 'Калькулятор' }
+    return { name: `${profileName(spec)} ${pos(v.sheetW)}×${pos(v.sheetL)} м`, priceKey: PROFILE_PRICE_KEY.sheet, kgPerM: k, length: area, count: Math.round(pos(v.count)), massKg: k * area * Math.round(pos(v.count)), profile: spec, source: 'Калькулятор' }
   }
   const count = v.mode === 'mass' && k > 0 && pos(v.length) > 0 ? Math.ceil((pos(v.targetMass) * 1000) / k / pos(v.length) - 1e-9) : Math.round(pos(v.count))
-  return { name: profileName(spec), priceKey: PROFILE_PRICE_KEY[v.profile], kgPerM: k, length: pos(v.length), count, massKg: k * pos(v.length) * count, source: 'Калькулятор' }
+  return { name: profileName(spec), priceKey: PROFILE_PRICE_KEY[v.profile], kgPerM: k, length: pos(v.length), count, massKg: k * pos(v.length) * count, profile: spec, source: 'Калькулятор' }
 }
 
 export const metal = defineCalculator<MetalValues>({

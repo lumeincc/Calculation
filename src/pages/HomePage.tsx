@@ -21,7 +21,7 @@ export function HomePage() {
     <div className="space-y-10">
       <section className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white px-6 py-8 sm:px-10 sm:py-10 dark:border-zinc-800 dark:bg-zinc-900">
         <div className="animate-glow pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl" />
-        <div className="animate-glow pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl [animation-delay:-4s]" />
+        <div className="animate-glow pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-zinc-400/10 blur-3xl [animation-delay:-4s]" />
         <div className="stagger relative max-w-3xl">
           <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Расчёты материалов, тоннаж и сметы — в одном месте</h1>
           <p className="mt-3 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
