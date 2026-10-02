@@ -94,12 +94,12 @@ export function Tabs<T extends string>({ value, onChange, tabs }: { value: T; on
   )
 }
 
-export function Stat({ label, value, unit, hint, accent }: { label: ReactNode; value: ReactNode; unit?: ReactNode; hint?: ReactNode; accent?: boolean }) {
+export function Stat({ label, value, unit, hint, accent, format, countUp }: { label: ReactNode; value: ReactNode; unit?: ReactNode; hint?: ReactNode; accent?: boolean; format?: (n: number) => string; /** Roll up from zero when the tile appears. */ countUp?: boolean }) {
   return (
-    <div className={`lift rounded-xl border p-4 ${accent ? 'border-accent-200 bg-accent-50 dark:border-accent-900 dark:bg-accent-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
-      <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</div>
+    <div className={`lift min-w-0 rounded-xl border p-3 sm:p-4 ${accent ? 'border-accent-200 bg-accent-50 dark:border-accent-900 dark:bg-accent-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
+      <div className="text-[11px] leading-tight font-medium text-zinc-500 sm:text-xs dark:text-zinc-400">{label}</div>
       <div className="mt-1 flex items-baseline gap-1.5">
-        <span className={`text-2xl font-semibold tracking-tight tabular-nums ${accent ? 'text-accent-700 dark:text-accent-300' : ''}`}>{typeof value === 'number' ? <AnimatedNumber value={value} digits={0} /> : value}</span>
+        <span className={`text-lg font-semibold tracking-tight break-words tabular-nums sm:text-2xl ${accent ? 'text-accent-700 dark:text-accent-300' : ''}`}>{typeof value === 'number' ? <AnimatedNumber value={value} digits={0} format={format} initial={countUp ? 0 : undefined} duration={countUp ? 900 : 650} /> : value}</span>
         {unit && <span className="text-sm text-zinc-500">{unit}</span>}
       </div>
       {hint && <div className="mt-0.5 text-xs text-zinc-500">{hint}</div>}

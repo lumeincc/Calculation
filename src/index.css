@@ -43,6 +43,7 @@
   --animate-halo: halo 7s ease-in-out infinite;
   --animate-sheen: sheen 6s ease-in-out infinite;
   --animate-sheet: sheet-up 0.32s var(--ease-out-soft) both;
+  --animate-grow: grow-x 0.9s var(--ease-out-soft) both;
 
   @keyframes page-in {
     from { opacity: 0; transform: translateY(10px); filter: blur(3px); }
@@ -67,6 +68,11 @@
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
+  }
+  /* Progress bars fill in from the left. */
+  @keyframes grow-x {
+    from { transform: scaleX(0); }
+    to { transform: none; }
   }
   @keyframes sheet-up {
     from { transform: translateY(100%); }

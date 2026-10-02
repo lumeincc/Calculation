@@ -51,7 +51,7 @@ export function StatusPicker<S extends string>({ value, flow, labels, onChange }
 
 export function Card({ title, actions, children, className = '' }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`card p-5 ${className}`}>
+    <section className={`card animate-fade-up p-5 ${className}`}>
       {(title || actions) && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           {title && <h2 className="font-semibold">{title}</h2>}

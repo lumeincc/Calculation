@@ -84,7 +84,7 @@ export function PapersPage() {
         subtitle={unpaid > 0 ? Tf('Ожидает оплаты по выставленным счетам: {0}', [money(unpaid)]) : T('Счета на оплату, акты выполненных работ, дополнительные соглашения и письма')}
         actions={<Button variant="primary" onClick={() => setCreating(true)}><Plus size={16} /> {T('Новый документ')}</Button>}
       />
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="stagger mb-4 flex flex-wrap gap-2">
         {[{ value: '', short: T('Все') }, ...PAPER_KINDS].map((k) => (
           <button
             key={k.value}
@@ -113,9 +113,9 @@ export function PapersPage() {
         <p className="py-10 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</p>
       ) : (
         <>
-        <div className="space-y-2 sm:hidden">
+        <div className="stagger space-y-2 sm:hidden">
           {list.map((p) => (
-            <Link key={p.id} to={`/office/papers/${p.id}`} className="card flex items-center gap-3 p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
+            <Link key={p.id} to={`/office/papers/${p.id}`} className="lift card flex items-center gap-3 p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
               <div className="min-w-0 flex-1">
                 <div className="font-semibold">{PAPER_KIND[p.kind].short} № {p.number} <span className="font-normal text-zinc-500">· {dateShort(p.date)}</span></div>
                 <div className="truncate text-sm text-zinc-600 dark:text-zinc-400">{cpName.get(p.counterpartyId ?? '') || '—'}</div>
@@ -138,7 +138,7 @@ export function PapersPage() {
                 <th className="px-4 py-2.5 font-medium">{T('Статус')}</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {list.map((p) => {
                 const overdue = p.kind === 'invoice' && p.status === 'sent' && (daysUntil(p.dueDate) ?? 1) < 0
                 return (

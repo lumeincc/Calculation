@@ -86,11 +86,11 @@ export function ContractPage() {
         </div>
       )}
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label={T('Сумма договора')} value={money(pr.total)} accent />
-        <Stat label={T('Выставлено счетов')} value={money(pr.invoiced)} />
-        <Stat label={T('Оплачено')} value={money(pr.paid)} hint={pr.total > 0 ? Tf('{0}% от суммы', [Math.round((pr.paid / pr.total) * 100)]) : undefined} />
-        <Stat label={T('Принято по актам')} value={money(pr.accepted)} hint={pr.debt > 0 ? Tf('не оплачено {0}', [money(pr.debt)]) : undefined} />
+      <div className="stagger mb-5 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <Stat countUp format={money} label={T('Сумма договора')} value={(pr.total)} accent />
+        <Stat countUp format={money} label={T('Выставлено счетов')} value={(pr.invoiced)} />
+        <Stat countUp format={money} label={T('Оплачено')} value={(pr.paid)} hint={pr.total > 0 ? Tf('{0}% от суммы', [Math.round((pr.paid / pr.total) * 100)]) : undefined} />
+        <Stat countUp format={money} label={T('Принято по актам')} value={(pr.accepted)} hint={pr.debt > 0 ? Tf('не оплачено {0}', [money(pr.debt)]) : undefined} />
       </div>
 
       <Tabs<Tab>
@@ -104,7 +104,7 @@ export function ContractPage() {
           { value: 'history', label: T('История') },
         ]}
       />
-      <div className="mt-5">
+      <div key={tab} className="animate-fade-up mt-5">
         {tab === 'terms' && (
           <div className="grid gap-5 lg:grid-cols-2">
             <Card title={T('Основное')}>
@@ -208,7 +208,7 @@ export function ContractPage() {
             {mine.length === 0 ? (
               <p className="text-sm text-zinc-500">{T('По договору пока нет документов. Создайте счёт на аванс — сумма посчитается сама.')}</p>
             ) : (
-              <div className="card divide-y divide-zinc-100 dark:divide-zinc-800">
+              <div className="stagger card divide-y divide-zinc-100 dark:divide-zinc-800">
                 {mine.map((p) => (
                   <Link key={p.id} to={`/office/papers/${p.id}`} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
                     <span className="w-44 font-medium">{PAPER_KIND[p.kind].short} № {p.number}</span>

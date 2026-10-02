@@ -10,7 +10,7 @@ import { useSettings } from '@/store/settings'
 const LOGO_MASK = `url(${import.meta.env.BASE_URL}brand/tonna-logo-white.svg)`
 
 /** Glowing logo: halo behind, breathing light around the shape and a sheen passing over it. */
-function GlowLogo({ className = '' }: { className?: string }) {
+export function GlowLogo({ className = '' }: { className?: string }) {
   return (
     <div className={`pointer-events-none relative aspect-[1030/1208] ${className}`} aria-hidden>
       <div className="animate-halo motion-safe-anim absolute -inset-[30%] rounded-full bg-[radial-gradient(closest-side,rgb(255_255_255/0.32),rgb(255_255_255/0.1)_45%,transparent_75%)] blur-2xl" />

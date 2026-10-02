@@ -2,10 +2,11 @@ import { AlertCircle, Archive, Building2, CalendarClock, FilePlus2, FileSignatur
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Button, ButtonLink } from '@/components/ui/Button'
-import { PageHeader, Stat } from '@/components/ui/misc'
+import { GlowLogo } from '@/components/home/Hero'
+import { Stat } from '@/components/ui/misc'
+import { OfficeTips } from '../components/OfficeTips'
 import { T, Tf } from '@/i18n'
 import { fmtDateTime, money } from '@/lib/format'
-import { useSettings } from '@/store/settings'
 import { fmtSize } from '../components/format'
 import { contractProgress, PAPER_KIND, paperTotals } from '../model'
 import { useOffice } from '../store'
@@ -27,7 +28,6 @@ export function OfficeHome() {
   const papers = useOffice((s) => s.papers)
   const files = useOffice((s) => s.files)
   const cps = useOffice((s) => s.counterparties)
-  const company = useSettings((s) => s.company)
   const [newContract, setNewContract] = useState(false)
   const [newPaper, setNewPaper] = useState(false)
   const cpName = useMemo(() => new Map(cps.map((c) => [c.id, c.name])), [cps])
@@ -82,34 +82,44 @@ export function OfficeHome() {
 
   return (
     <div>
-      <PageHeader
-        title={T('Документооборот')}
-        subtitle={T('Договоры, счета, акты, подписи и архив документов компании — всё по порядку и в одном месте')}
-        actions={
-          <>
-            <ButtonLink to="/office/files"><Upload size={16} /> {T('Загрузить файлы')}</ButtonLink>
-            <Button onClick={() => setNewPaper(true)}><FilePlus2 size={16} /> {T('Счёт или акт')}</Button>
-            <Button variant="primary" onClick={() => setNewContract(true)}><FileSignature size={16} /> {T('Новый договор')}</Button>
-          </>
-        }
-      />
-
-      {(!company.name || !company.inn) && (
-        <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-          <b>{T('Начните с реквизитов компании.')}</b> {T('Название, БИН, банк и подписант подставляются во все договоры, счета и акты.')}{' '}
-          <Link to="/settings" className="font-medium underline">{T('Заполнить')}</Link>
+      <section className="dark relative mb-6 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 text-white shadow-2xl shadow-zinc-950/20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_85%_40%,rgb(63_63_70/0.55),transparent_60%)]" />
+        <div className="animate-glow pointer-events-none absolute -right-16 -bottom-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="relative grid items-center gap-6 px-5 py-6 sm:px-10 sm:py-9 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="stagger max-w-2xl">
+            <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-4xl">{T('Документооборот')}</h1>
+            <p className="mt-2 text-sm text-zinc-400 sm:mt-3 sm:text-lg">{T('Договоры, счета, акты, подписи и архив документов компании — всё по порядку и в одном месте')}</p>
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:gap-3 [&>*]:max-sm:px-2 [&>*]:max-sm:text-[13px] [&>*:first-child]:col-span-2">
+              <Button variant="primary" className="!bg-white !text-zinc-900 shadow-[0_0_24px_rgb(255_255_255/0.18)] hover:!bg-zinc-200" onClick={() => setNewContract(true)}>
+                <FileSignature size={16} /> {T('Новый договор')}
+              </Button>
+              <Button className="!border-white/15 !bg-white/5 !text-white hover:!bg-white/10" onClick={() => setNewPaper(true)}><FilePlus2 size={16} /> {T('Счёт или акт')}</Button>
+              <ButtonLink to="/office/files" className="!border-white/15 !bg-white/5 !text-white hover:!bg-white/10"><Upload size={16} /> {T('Загрузить файлы')}</ButtonLink>
+            </div>
+          </div>
+          <div className="hidden flex-col items-center px-6 md:flex">
+            <GlowLogo className="h-44 lg:h-52" />
+            <span className="mt-4 text-xs font-bold tracking-[0.5em] text-white/80 [text-shadow:0_0_12px_rgb(255_255_255/0.6)]">DOCS</span>
+          </div>
         </div>
-      )}
+        <div className="pointer-events-none absolute -right-8 -bottom-6 opacity-25 md:hidden">
+          <GlowLogo className="h-36" />
+        </div>
+      </section>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label={T('Действующих договоров')} value={stats.active} />
-        <Stat label={T('Осталось получить по ним')} value={money(stats.portfolio)} />
-        <Stat label={T('Счета ждут оплаты')} value={money(stats.waiting)} />
-        <Stat label={T('Работы приняты, не оплачены')} value={money(stats.debt)} accent={stats.debt > 0} />
+      <div className="stagger mb-6 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <Stat countUp label={T('Действующих договоров')} value={stats.active} />
+        <Stat countUp format={money} label={T('Осталось получить по ним')} value={(stats.portfolio)} />
+        <Stat countUp format={money} label={T('Счета ждут оплаты')} value={(stats.waiting)} />
+        <Stat countUp format={money} label={T('Работы приняты, не оплачены')} value={(stats.debt)} accent={stats.debt > 0} />
+      </div>
+
+      <div className="mb-6">
+        <OfficeTips />
       </div>
 
       {empty ? (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="stagger grid gap-4 md:grid-cols-3">
           {[
             { icon: <Building2 size={22} />, title: T('1. Добавьте контрагентов'), text: T('Реквизиты заказчиков и поставщиков вводятся один раз.'), to: '/office/counterparties' },
             { icon: <FileSignature size={22} />, title: T('2. Сделайте договор'), text: T('Из шаблона или прямо из сметы: сумма прописью, даты и реквизиты подставятся сами.'), to: '/office/contracts?new=1' },
@@ -123,13 +133,13 @@ export function OfficeHome() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="stagger grid gap-5 lg:grid-cols-3">
           <section className="card p-5 lg:col-span-2">
             <h2 className="mb-3 font-semibold">{T('Требует внимания')}</h2>
             {alerts.length === 0 ? (
               <p className="text-sm text-zinc-500">{T('Всё в порядке: нет просроченных счетов, документов на подписи и истекающих договоров.')}</p>
             ) : (
-              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <ul className="stagger divide-y divide-zinc-100 dark:divide-zinc-800">
                 {alerts.slice(0, 12).map((a) => (
                   <li key={a.key}>
                     <Link to={a.to} className="flex items-start gap-3 py-2.5 hover:underline">
@@ -149,7 +159,7 @@ export function OfficeHome() {
             {recentDocs.length === 0 ? (
               <p className="text-sm text-zinc-500">{T('Документов пока нет.')}</p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="stagger space-y-2">
                 {recentDocs.map((d) => (
                   <li key={d.id}>
                     <Link to={d.to} className="flex items-center gap-2 text-sm hover:underline">
@@ -170,9 +180,9 @@ export function OfficeHome() {
             {recentFiles.length === 0 ? (
               <p className="text-sm text-zinc-500">{T('Архив пуст. Загрузите сканы договоров, письма и чертежи — они будут под рукой.')}</p>
             ) : (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="stagger grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {recentFiles.map((f) => (
-                  <Link key={f.id} to={f.folderId ? `/office/files?folder=${f.folderId}` : '/office/files'} className="flex items-center gap-3 rounded-lg border border-zinc-200 p-3 text-sm hover:border-zinc-400 dark:border-zinc-800">
+                  <Link key={f.id} to={f.folderId ? `/office/files?folder=${f.folderId}` : '/office/files'} className="lift flex items-center gap-3 rounded-lg border border-zinc-200 p-3 text-sm hover:border-zinc-400 dark:border-zinc-800">
                     <Archive size={16} className="shrink-0 text-zinc-400" />
                     <div className="min-w-0">
                       <div className="truncate font-medium">{f.name}</div>

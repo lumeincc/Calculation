@@ -44,7 +44,7 @@ export function CounterpartiesPage() {
             <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
             <TextInput className="pl-9" value={q} placeholder={T('Название, БИН, телефон…')} onChange={(e) => setQ(e.target.value)} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {rows.map((c) => {
               const cs = contracts.filter((x) => x.counterpartyId === c.id)
               const debt = cs.reduce((s, x) => s + contractProgress(x, papers).debt, 0)
@@ -103,10 +103,10 @@ export function CounterpartyPage() {
           </>
         }
       />
-      <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Stat label={T('Сумма договоров')} value={money(sum.total)} />
-        <Stat label={T('Оплачено')} value={money(sum.paid)} />
-        <Stat label={T('Принято, но не оплачено')} value={money(sum.debt)} accent={sum.debt > 0} />
+      <div className="stagger mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
+        <Stat countUp format={money} label={T('Сумма договоров')} value={(sum.total)} />
+        <Stat countUp format={money} label={T('Оплачено')} value={(sum.paid)} />
+        <Stat countUp format={money} label={T('Принято, но не оплачено')} value={(sum.debt)} accent={sum.debt > 0} />
       </div>
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-5">

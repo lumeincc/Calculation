@@ -460,7 +460,7 @@ export function FilesPage() {
           )}
 
           {subfolders.length > 0 && (
-            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+            <div className="stagger mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
               {subfolders.map((f) => (
                 <Link
                   key={f.id}
@@ -507,7 +507,7 @@ export function FilesPage() {
                     <th className="w-20" />
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="stagger">
                   {shown.map((f) => {
                     const folderName = searching || view ? folders.find((x) => x.id === f.folderId)?.name : null
                     return (

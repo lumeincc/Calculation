@@ -40,7 +40,7 @@ export function TemplatesPage() {
         subtitle={T('Готовые шаблоны по законодательству РК и ваши собственные. Поля в {{скобках}} заполняются из карточки договора.')}
         actions={<Button variant="primary" onClick={() => nav(`/office/templates/${add({ name: T('Новый шаблон'), body: '# ДОГОВОР № {{договор.номер}}\n\n{{договор.город}} || {{договор.дата}}\n\n\n{{реквизиты}}\n' })}`)}><Plus size={16} /> {T('Новый шаблон')}</Button>}
       />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {list.map((t) => (
           <Link key={t.id} to={`/office/templates/${t.id}`} className="card lift flex items-start gap-3 p-4">
             <FileText size={20} className="mt-0.5 shrink-0 text-zinc-400" />

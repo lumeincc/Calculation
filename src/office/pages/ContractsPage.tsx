@@ -59,7 +59,7 @@ export function ContractsPage() {
         subtitle={T('Шаблоны, статусы согласования, подписи, счета и акты по каждому договору')}
         actions={<Button variant="primary" onClick={() => setCreating(true)}><Plus size={16} /> {T('Новый договор')}</Button>}
       />
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="stagger mb-4 flex flex-wrap gap-2">
         {tab('all', T('Все'))}
         {CONTRACT_FLOW.map((s) => tab(s, CONTRACT_STATUS[s].label))}
       </div>
@@ -82,12 +82,12 @@ export function ContractsPage() {
         <p className="py-10 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</p>
       ) : (
         <>
-        <div className="space-y-2 sm:hidden">
+        <div className="stagger space-y-2 sm:hidden">
           {list.map((c) => {
             const pr = contractProgress(c, papers)
             const pct = pr.total > 0 ? Math.min(100, (pr.paid / pr.total) * 100) : 0
             return (
-              <Link key={c.id} to={`/office/contracts/${c.id}`} className="card block p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
+              <Link key={c.id} to={`/office/contracts/${c.id}`} className="lift card block p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="font-semibold">№ {c.number || '—'} <span className="font-normal text-zinc-500">· {dateShort(c.date)}</span></div>
@@ -98,7 +98,7 @@ export function ContractsPage() {
                 {c.title && <div className="mt-1 truncate text-xs text-zinc-500">{c.title}</div>}
                 <div className="mt-3 flex items-center gap-3">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-                    <div className="h-full rounded-full bg-zinc-900 dark:bg-white" style={{ width: `${pct}%` }} />
+                    <div className="animate-grow h-full origin-left rounded-full bg-zinc-900 transition-[width] duration-700 dark:bg-white" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-sm font-semibold tabular-nums">{money(pr.total)}</span>
                 </div>
@@ -118,7 +118,7 @@ export function ContractsPage() {
                 <th className="px-4 py-2.5 font-medium">{T('Статус')}</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {list.map((c) => {
                 const pr = contractProgress(c, papers)
                 const left = c.status === 'active' ? daysUntil(c.endDate) : null
@@ -144,7 +144,7 @@ export function ContractsPage() {
                     <td className="px-4 py-3 text-right align-top font-medium whitespace-nowrap tabular-nums">{money(pr.total)}</td>
                     <td className="px-4 py-3 align-top">
                       <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-                        <div className="h-full rounded-full bg-zinc-900 dark:bg-white" style={{ width: `${pct}%` }} />
+                        <div className="animate-grow h-full origin-left rounded-full bg-zinc-900 transition-[width] duration-700 dark:bg-white" style={{ width: `${pct}%` }} />
                       </div>
                       <div className="mt-1 text-xs text-zinc-500 tabular-nums">{money(pr.paid)}</div>
                     </td>
