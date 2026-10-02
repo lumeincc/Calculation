@@ -10,6 +10,7 @@ import { extractDrawingSpec } from './drawingSpec'
 import { extractFromTable } from './tables'
 import type { Cell, DocAnalysis, DocFile, DocTable } from './types'
 import { readZip } from './zip'
+import { T, Tf } from '@/i18n'
 
 const MAX_TEXT = 2_000_000
 
@@ -45,13 +46,13 @@ async function analyzeSheet(file: DocFile): Promise<DocAnalysis> {
 async function analyzePdf(file: DocFile): Promise<DocAnalysis> {
   const { extractPdf } = await import('./pdf')
   const r = await extractPdf(file.data)
-  const notes = r.text.trim().length < 20 ? ['В PDF нет текстового слоя (скан). Для распознавания нужен OCR — он в плане развития.'] : undefined
+  const notes = r.text.trim().length < 20 ? [T('В PDF нет текстового слоя (скан). Для распознавания нужен OCR — он в плане развития.')] : undefined
   const result = finish(file, { tables: r.tables, text: r.text, pages: r.pages, notes })
   const drawing = extractDrawingSpec(r.tables, file.id)
   if (drawing) {
     // An assembly drawing: its own specification × number of marks replaces generic table rows.
     result.metal = drawing.hits
-    result.notes = [...(result.notes ?? []), `Сборочный чертёж: ${drawing.marks} ${drawing.marks === 1 ? 'марка' : 'марок/марки'}, вес всех марок ${drawing.totalKg} кг (с учётом сварных швов).`]
+    result.notes = [...(result.notes ?? []), Tf('Сборочный чертёж: {0} {1}, вес всех марок {2} кг (с учётом сварных швов).', [drawing.marks, drawing.marks === 1 ? T('марка') : T('марок/марки'), drawing.totalKg])]
   }
   return result
 }
@@ -62,17 +63,17 @@ async function analyzeDocx(file: DocFile): Promise<DocAnalysis> {
   const { value } = await mammoth.convertToHtml({ arrayBuffer: buf })
   const html = sanitizeHtml(value)
   const doc = new DOMParser().parseFromString(html, 'text/html')
-  const tables = tablesFromHtml(doc).map((rows, i) => ({ title: `Таблица ${i + 1}`, rows }))
+  const tables = tablesFromHtml(doc).map((rows, i) => ({ title: Tf('Таблица {0}', [i + 1]), rows }))
   return finish(file, { tables, text: doc.body.textContent ?? '', html })
 }
 
 function analyzeOdt(file: DocFile): DocAnalysis {
   const entry = readZip(file.data).find((e) => e.name === 'content.xml')
-  if (!entry) throw new Error('В ODT нет content.xml')
+  if (!entry) throw new Error(T('В ODT нет content.xml'))
   const xml = new TextDecoder('utf-8').decode(entry.read())
   const doc = new DOMParser().parseFromString(xml, 'application/xml')
   const tables = [...doc.getElementsByTagName('table:table')].map((t, i) => ({
-    title: `Таблица ${i + 1}`,
+    title: Tf('Таблица {0}', [i + 1]),
     rows: [...t.getElementsByTagName('table:table-row')].map((r) =>
       [...r.getElementsByTagName('table:table-cell')].map((c) => (c.textContent ?? '').trim()),
     ),
@@ -127,7 +128,7 @@ async function analyzeDxf(file: DocFile): Promise<DocAnalysis> {
   return finish(file, {
     tables: [],
     text: texts.join('\n'),
-    notes: [`Объектов на чертеже: ${dxf?.entities.length ?? 0}, текстовых надписей: ${texts.length}`],
+    notes: [Tf('Объектов на чертеже: {0}, текстовых надписей: {1}', [dxf?.entities.length ?? 0, texts.length])],
   })
 }
 
@@ -146,16 +147,16 @@ export async function analyzeDoc(file: DocFile): Promise<DocAnalysis> {
       case 'cad':
         return {
           status: 'unsupported', text: '', tables: [], positions: [], metal: [],
-          notes: ['Формат САПР/BIM не читается в браузере. Сохраните чертёж в DXF или PDF — их сайт разбирает.'],
+          notes: [T('Формат САПР/BIM не читается в браузере. Сохраните чертёж в DXF или PDF — их сайт разбирает.')],
         }
       default:
         if (file.ext === 'doc') {
           return {
             status: 'unsupported', text: '', tables: [], positions: [], metal: [],
-            notes: ['Старый формат Word (.doc) — сохраните документ как DOCX или PDF.'],
+            notes: [T('Старый формат Word (.doc) — сохраните документ как DOCX или PDF.')],
           }
         }
-        return { status: 'unsupported', text: '', tables: [], positions: [], metal: [], notes: ['Предпросмотр этого формата не поддерживается — файл можно скачать.'] }
+        return { status: 'unsupported', text: '', tables: [], positions: [], metal: [], notes: [T('Предпросмотр этого формата не поддерживается — файл можно скачать.')] }
     }
   } catch (err) {
     return { status: 'error', error: err instanceof Error ? err.message : String(err), text: '', tables: [], positions: [], metal: [] }

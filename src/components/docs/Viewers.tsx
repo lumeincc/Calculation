@@ -8,6 +8,7 @@ import type { Cell, DocAnalysis, DocFile, DocTable } from '@/docs/types'
 import { downloadBytes } from '@/lib/export'
 import { fmt } from '@/lib/format'
 import { DxfViewer } from './DxfViewer'
+import { T } from '@/i18n'
 
 function PdfPage({ doc, n, scale }: { doc: PDFDocumentProxy; n: number; scale: number }) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -67,16 +68,16 @@ function PdfViewer({ data }: { data: Uint8Array }) {
       void destroy?.()
     }
   }, [data])
-  if (error) return <p className="p-6 text-sm text-red-600">Не удалось открыть PDF: {error}</p>
-  if (!doc) return <p className="p-6 text-sm text-zinc-500">Открываем PDF…</p>
+  if (error) return <p className="p-6 text-sm text-red-600">{T('Не удалось открыть PDF:')} {error}</p>
+  if (!doc) return <p className="p-6 text-sm text-zinc-500">{T('Открываем PDF…')}</p>
   return (
     <div>
       <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-zinc-200 bg-white/90 px-3 py-1.5 text-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90">
-        <span className="text-zinc-500">{doc.numPages} стр.</span>
+        <span className="text-zinc-500">{doc.numPages}  {T('стр.')}</span>
         <div className="ml-auto flex items-center gap-1">
-          <IconButton label="Уменьшить" onClick={() => setScale((s) => Math.max(0.4, s - 0.2))}><Minus size={15} /></IconButton>
+          <IconButton label={T('Уменьшить')} onClick={() => setScale((s) => Math.max(0.4, s - 0.2))}><Minus size={15} /></IconButton>
           <span className="w-12 text-center tabular-nums">{Math.round(scale * 100)}%</span>
-          <IconButton label="Увеличить" onClick={() => setScale((s) => Math.min(4, s + 0.2))}><Plus size={15} /></IconButton>
+          <IconButton label={T('Увеличить')} onClick={() => setScale((s) => Math.min(4, s + 0.2))}><Plus size={15} /></IconButton>
         </div>
       </div>
       <div className="max-h-[75vh] overflow-auto bg-zinc-100 p-4 dark:bg-zinc-950">
@@ -109,7 +110,7 @@ export function TableView({ table, limit = 300 }: { table: DocTable; limit?: num
       </table>
       {table.rows.length > shown && (
         <div className="p-3 text-center">
-          <Button size="sm" onClick={() => setShown((s) => s + 1000)}>Показать ещё ({table.rows.length - shown})</Button>
+          <Button size="sm" onClick={() => setShown((s) => s + 1000)}>{T('Показать ещё (')}{table.rows.length - shown})</Button>
         </div>
       )}
     </div>
@@ -118,7 +119,7 @@ export function TableView({ table, limit = 300 }: { table: DocTable; limit?: num
 
 function SheetViewer({ tables }: { tables: DocTable[] }) {
   const [i, setI] = useState(0)
-  if (!tables.length) return <p className="p-6 text-sm text-zinc-500">Таблица пуста</p>
+  if (!tables.length) return <p className="p-6 text-sm text-zinc-500">{T('Таблица пуста')}</p>
   return (
     <div>
       {tables.length > 1 && (
@@ -155,7 +156,7 @@ export function DocViewer({ file, analysis }: { file: DocFile; analysis?: DocAna
     switch (file.kind) {
       case 'pdf': return <PdfViewer data={file.data} />
       case 'sheet': return <SheetViewer tables={analysis?.tables ?? []} />
-      case 'docx': return analysis?.html ? <div className="doc-html max-h-[75vh] overflow-auto p-6 text-sm">{<div dangerouslySetInnerHTML={{ __html: analysis.html }} />}</div> : <p className="p-6 text-sm text-zinc-500">Чтение документа…</p>
+      case 'docx': return analysis?.html ? <div className="doc-html max-h-[75vh] overflow-auto p-6 text-sm">{<div dangerouslySetInnerHTML={{ __html: analysis.html }} />}</div> : <p className="p-6 text-sm text-zinc-500">{T('Чтение документа…')}</p>
       case 'odt': return <pre className="max-h-[75vh] overflow-auto p-4 text-sm whitespace-pre-wrap">{analysis?.text}</pre>
       case 'image': return <ImageViewer file={file} />
       case 'text': return file.ext === 'rtf' ? <pre className="max-h-[75vh] overflow-auto p-4 text-sm whitespace-pre-wrap">{analysis?.text}</pre> : <TextViewer file={file} />
@@ -163,8 +164,8 @@ export function DocViewer({ file, analysis }: { file: DocFile; analysis?: DocAna
       default:
         return (
           <div className="p-8 text-center text-sm text-zinc-500">
-            {analysis?.notes?.map((n) => <p key={n}>{n}</p>) ?? 'Предпросмотр недоступен'}
-            <Button className="mt-4" size="sm" onClick={() => downloadBytes(file.data, file.name)}><Download size={15} /> Скачать файл</Button>
+            {analysis?.notes?.map((n) => <p key={n}>{n}</p>) ?? T('Предпросмотр недоступен')}
+            <Button className="mt-4" size="sm" onClick={() => downloadBytes(file.data, file.name)}><Download size={15} />  {T('Скачать файл')}</Button>
           </div>
         )
     }

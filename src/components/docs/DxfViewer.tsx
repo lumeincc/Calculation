@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { decodeText } from '@/docs/encoding'
 import { cleanMtext } from '@/docs/dxfText'
+import { T } from '@/i18n'
 
 interface Shape {
   d?: string
@@ -94,9 +95,9 @@ export function DxfViewer({ data }: { data: Uint8Array }) {
           if (s.circle) { grow(s.circle[0] - s.circle[2], s.circle[1] - s.circle[2]); grow(s.circle[0] + s.circle[2], s.circle[1] + s.circle[2]) }
           if (s.text) grow(s.text.x, s.text.y)
         }
-        if (alive) setState(Number.isFinite(x0) ? { shapes, box: [x0, y0, x1 - x0 || 1, y1 - y0 || 1] } : { error: 'На чертеже нет поддерживаемых объектов' })
+        if (alive) setState(Number.isFinite(x0) ? { shapes, box: [x0, y0, x1 - x0 || 1, y1 - y0 || 1] } : { error: T('На чертеже нет поддерживаемых объектов') })
       } catch (err) {
-        if (alive) setState({ error: err instanceof Error ? err.message : 'Ошибка чтения DXF' })
+        if (alive) setState({ error: err instanceof Error ? err.message : T('Ошибка чтения DXF') })
       }
     })
     return () => {
@@ -104,7 +105,7 @@ export function DxfViewer({ data }: { data: Uint8Array }) {
     }
   }, [data])
 
-  if (!state) return <p className="p-6 text-sm text-zinc-500">Чтение чертежа…</p>
+  if (!state) return <p className="p-6 text-sm text-zinc-500">{T('Чтение чертежа…')}</p>
   if ('error' in state) return <p className="p-6 text-sm text-red-600">{state.error}</p>
   const [x, y, w, h] = state.box
   const pad = Math.max(w, h) * 0.02

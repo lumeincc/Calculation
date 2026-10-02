@@ -3,6 +3,7 @@ import type { Field as FieldDef, FieldGroup, RowValues, RowsField, Values } from
 import { IconButton } from '@/components/ui/Button'
 import { Field, NumberInput, Segmented, Select, Toggle } from '@/components/ui/Field'
 import { num } from '@/lib/num'
+import { T } from '@/i18n'
 
 const SPAN: Record<number, string> = { 2: 'sm:col-span-2', 3: 'sm:col-span-3', 6: 'sm:col-span-6' }
 
@@ -23,7 +24,7 @@ function RowsEditor({ field, rows, onChange }: { field: RowsField<Values>; rows:
                 )}
               </div>
             ))}
-            <IconButton label="Удалить строку" onClick={() => onChange(rows.filter((_, j) => j !== i))}>
+            <IconButton label={T('Удалить строку')} onClick={() => onChange(rows.filter((_, j) => j !== i))}>
               <Trash2 size={16} />
             </IconButton>
           </div>
@@ -34,7 +35,7 @@ function RowsEditor({ field, rows, onChange }: { field: RowsField<Values>; rows:
         onClick={() => onChange([...rows, { ...field.newRow }])}
         className="mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-brand-700 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-950/50"
       >
-        <Plus size={15} /> {field.addLabel ?? 'Добавить'}
+        <Plus size={15} /> {field.addLabel ?? T('Добавить')}
       </button>
     </div>
   )

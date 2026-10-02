@@ -1,10 +1,11 @@
+import { lang, locale, Tf } from '@/i18n'
 const cache = new Map<string, Intl.NumberFormat>()
 
 function nf(min: number, max: number): Intl.NumberFormat {
   const key = `${min}:${max}`
   let f = cache.get(key)
   if (!f) {
-    f = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: min, maximumFractionDigits: max })
+    f = new Intl.NumberFormat(locale, { minimumFractionDigits: min, maximumFractionDigits: max })
     cache.set(key, f)
   }
   return f
@@ -28,15 +29,15 @@ export function money(n: number, withSign = true): string {
 
 /** Mass in kg presented as "850 кг" or "12,35 т" depending on magnitude. */
 export function mass(kg: number): string {
-  return kg >= 1000 ? `${fmt(kg / 1000, 3)} т` : `${fmt(kg, 1)} кг`
+  return kg >= 1000 ? Tf('{0} т', [fmt(kg / 1000, 3)]) : Tf('{0} кг', [fmt(kg, 1)])
 }
 
 export function fmtDate(ts: number): string {
-  return new Date(ts).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(ts).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export function fmtDateTime(ts: number): string {
-  return new Date(ts).toLocaleString('ru-RU', {
+  return new Date(ts).toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -47,6 +48,7 @@ export function fmtDateTime(ts: number): string {
 
 /** Russian plural: plural(5, ['позиция', 'позиции', 'позиций']) → "позиций" */
 export function plural(n: number, forms: [string, string, string]): string {
+  if (lang === 'en') return Math.abs(n) === 1 ? forms[0] : forms[2]
   const a = Math.abs(n) % 100
   const b = a % 10
   if (a > 10 && a < 20) return forms[2]

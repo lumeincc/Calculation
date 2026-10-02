@@ -6,6 +6,7 @@
  */
 import { inflateSync } from 'fflate'
 import { decodeName } from './encoding'
+import { T, Tf } from '@/i18n'
 
 export class UnsupportedZip extends Error {}
 
@@ -29,14 +30,14 @@ export function readZip(data: Uint8Array): ZipEntry[] {
       break
     }
   }
-  if (eocd < 0) throw new UnsupportedZip('Не найден каталог ZIP-архива')
+  if (eocd < 0) throw new UnsupportedZip(T('Не найден каталог ZIP-архива'))
   const count = dv.getUint16(eocd + 10, true)
   let off = dv.getUint32(eocd + 16, true)
   if (count === 0xffff || off === 0xffffffff) throw new UnsupportedZip('ZIP64')
 
   const entries: ZipEntry[] = []
   for (let n = 0; n < count; n++) {
-    if (off + 46 > data.length || dv.getUint32(off, true) !== 0x02014b50) throw new UnsupportedZip('Повреждён каталог ZIP')
+    if (off + 46 > data.length || dv.getUint32(off, true) !== 0x02014b50) throw new UnsupportedZip(T('Повреждён каталог ZIP'))
     const flags = dv.getUint16(off + 8, true)
     const method = dv.getUint16(off + 10, true)
     const csize = dv.getUint32(off + 20, true)
@@ -60,7 +61,7 @@ export function readZip(data: Uint8Array): ZipEntry[] {
     off = xend + clen
 
     if (name.endsWith('/') || name.endsWith('\\')) continue
-    if (method !== 0 && method !== 8) throw new UnsupportedZip(`метод сжатия ${method}`)
+    if (method !== 0 && method !== 8) throw new UnsupportedZip(Tf('метод сжатия {0}', [method]))
     const encrypted = (flags & 1) !== 0
     entries.push({
       name: name.replace(/\\/g, '/'),
@@ -68,7 +69,7 @@ export function readZip(data: Uint8Array): ZipEntry[] {
       compressedSize: csize,
       encrypted,
       read() {
-        if (encrypted) throw new Error('Файл в архиве защищён паролем')
+        if (encrypted) throw new Error(T('Файл в архиве защищён паролем'))
         const lnlen = dv.getUint16(local + 26, true)
         const lxlen = dv.getUint16(local + 28, true)
         const start = local + 30 + lnlen + lxlen

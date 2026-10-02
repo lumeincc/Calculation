@@ -2,6 +2,7 @@ import { X } from 'lucide-react'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { AnimatedNumber } from './AnimatedNumber'
 import { IconButton } from './Button'
+import { T } from '@/i18n'
 
 export function PageHeader({ title, subtitle, actions }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
@@ -59,7 +60,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
         <div className="flex max-h-[85vh] flex-col">
           <div className="flex items-center justify-between gap-4 border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
             <h2 className="text-lg font-semibold">{title}</h2>
-            <IconButton label="Закрыть" onClick={onClose}>
+            <IconButton label={T('Закрыть')} onClick={onClose}>
               <X size={18} />
             </IconButton>
           </div>

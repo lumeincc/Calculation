@@ -1,5 +1,5 @@
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from 'react'
-import { fmt } from '@/lib/format'
+import { locale } from '@/i18n'
 import { parseDecimal } from '@/lib/num'
 
 export function Field({ label, hint, children, htmlFor, className = '' }: { label?: ReactNode; hint?: ReactNode; children: ReactNode; htmlFor?: string; className?: string }) {
@@ -16,7 +16,8 @@ export function Field({ label, hint, children, htmlFor, className = '' }: { labe
   )
 }
 
-const toText = (v: number) => (Number.isFinite(v) ? fmt(v, 6).replace(/ /g, ' ').replace(/\s/g, '') : '')
+const plain = new Intl.NumberFormat(locale, { maximumFractionDigits: 6, useGrouping: false })
+const toText = (v: number) => (Number.isFinite(v) ? plain.format(v) : '')
 
 /**
  * Numeric input that keeps what the user types («2,5», «2.», «») and reports a parsed number.

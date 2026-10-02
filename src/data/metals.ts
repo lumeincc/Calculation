@@ -1,3 +1,4 @@
+import { T } from '@/i18n'
 /**
  * Reference data for rolled metal (металлопрокат).
  * Mass-per-metre tables follow the Russian standards named next to each table;
@@ -12,17 +13,17 @@ export interface MetalMaterial {
 }
 
 export const METAL_MATERIALS: MetalMaterial[] = [
-  { id: 'steel', name: 'Сталь углеродистая (Ст3, 09Г2С)', density: 7850 },
-  { id: 'stainless', name: 'Нержавеющая сталь AISI 304', density: 7900 },
-  { id: 'stainless430', name: 'Нержавеющая сталь AISI 430', density: 7700 },
-  { id: 'aluminum', name: 'Алюминий и сплавы (АД31, АМг)', density: 2700 },
-  { id: 'copper', name: 'Медь', density: 8940 },
-  { id: 'brass', name: 'Латунь', density: 8500 },
-  { id: 'bronze', name: 'Бронза', density: 8800 },
-  { id: 'titanium', name: 'Титан', density: 4500 },
-  { id: 'castiron', name: 'Чугун', density: 7200 },
-  { id: 'zinc', name: 'Цинк', density: 7130 },
-  { id: 'lead', name: 'Свинец', density: 11340 },
+  { id: 'steel', name: T('Сталь углеродистая (Ст3, 09Г2С)'), density: 7850 },
+  { id: 'stainless', name: T('Нержавеющая сталь AISI 304'), density: 7900 },
+  { id: 'stainless430', name: T('Нержавеющая сталь AISI 430'), density: 7700 },
+  { id: 'aluminum', name: T('Алюминий и сплавы (АД31, АМг)'), density: 2700 },
+  { id: 'copper', name: T('Медь'), density: 8940 },
+  { id: 'brass', name: T('Латунь'), density: 8500 },
+  { id: 'bronze', name: T('Бронза'), density: 8800 },
+  { id: 'titanium', name: T('Титан'), density: 4500 },
+  { id: 'castiron', name: T('Чугун'), density: 7200 },
+  { id: 'zinc', name: T('Цинк'), density: 7130 },
+  { id: 'lead', name: T('Свинец'), density: 11340 },
 ]
 
 export const STEEL_DENSITY = 7850

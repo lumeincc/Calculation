@@ -8,25 +8,26 @@ import { useDocs } from '@/store/docs'
 import { useEstimates } from '@/store/estimates'
 import { useSettings, type Theme } from '@/store/settings'
 import { TonnaLogo } from './TonnaLogo'
+import { LANGS, lang, setLang, T } from '@/i18n'
 
 const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
-  { to: '/', label: 'Главная', icon: Home, end: true },
-  { to: '/calc', label: 'Калькуляторы', icon: Calculator, end: true },
-  { to: '/docs', label: 'Документы', icon: FolderOpen },
-  { to: '/estimates', label: 'Сметы', icon: FileSpreadsheet },
-  { to: '/calc/metal', label: 'Тоннаж металла', icon: Weight },
-  { to: '/prices', label: 'Справочник цен', icon: Tags },
+  { to: '/', label: T('Главная'), icon: Home, end: true },
+  { to: '/calc', label: T('Калькуляторы'), icon: Calculator, end: true },
+  { to: '/docs', label: T('Документы'), icon: FolderOpen },
+  { to: '/estimates', label: T('Сметы'), icon: FileSpreadsheet },
+  { to: '/calc/metal', label: T('Тоннаж металла'), icon: Weight },
+  { to: '/prices', label: T('Справочник цен'), icon: Tags },
 ]
 
 const BOTTOM = [
-  { to: '/account', label: 'Аккаунт и команда', icon: CircleUserRound },
-  { to: '/settings', label: 'Настройки', icon: Settings },
+  { to: '/account', label: T('Аккаунт и команда'), icon: CircleUserRound },
+  { to: '/settings', label: T('Настройки'), icon: Settings },
 ]
 
 const THEMES: { v: Theme; icon: LucideIcon; label: string }[] = [
-  { v: 'light', icon: Sun, label: 'Тема: светлая' },
-  { v: 'dark', icon: Moon, label: 'Тема: тёмная' },
-  { v: 'system', icon: Monitor, label: 'Тема: как в системе' },
+  { v: 'light', icon: Sun, label: T('Тема: светлая') },
+  { v: 'dark', icon: Moon, label: T('Тема: тёмная') },
+  { v: 'system', icon: Monitor, label: T('Тема: как в системе') },
 ]
 
 function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
@@ -70,6 +71,21 @@ function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
   )
 }
 
+function LangTile() {
+  const next = LANGS[(LANGS.findIndex((l) => l.value === lang) + 1) % LANGS.length]
+  const cur = LANGS.find((l) => l.value === lang) ?? LANGS[0]
+  return (
+    <button type="button" aria-label={next.label} onClick={() => setLang(next.value)} className="group relative flex h-11 w-11 items-center justify-center">
+      <span className="flex h-full w-full items-center justify-center rounded-[14px] border border-zinc-200/80 bg-white text-[13px] font-semibold tracking-wide text-zinc-700 shadow-sm hover:text-zinc-950 dark:border-zinc-700/80 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:text-white">
+        {cur.short}
+      </span>
+      <span className="pointer-events-none absolute top-1/2 left-full ml-4 hidden -translate-y-1/2 rounded-lg bg-zinc-900 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg group-hover:block dark:bg-white dark:text-zinc-900">
+        {next.label}
+      </span>
+    </button>
+  )
+}
+
 export function Dock({ onSearch }: { onSearch(): void }) {
   const estimates = useEstimates((s) => s.estimates.length)
   const docs = useDocs((s) => s.files.filter((f) => f.kind !== 'archive').length)
@@ -87,10 +103,10 @@ export function Dock({ onSearch }: { onSearch(): void }) {
       className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-center lg:flex"
     >
       <nav className="mx-auto flex w-[64px] flex-col items-center gap-2 rounded-[22px] border border-zinc-200/70 bg-white/60 py-3 shadow-xl shadow-zinc-900/5 backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-900/60 dark:shadow-black/40">
-        <NavLink to="/" aria-label="TONNA — на главную" className="mb-1 flex h-12 items-center justify-center text-zinc-900 dark:text-white">
+        <NavLink to="/" aria-label={T('TONNA — на главную')} className="mb-1 flex h-12 items-center justify-center text-zinc-900 dark:text-white">
           <TonnaLogo className="h-11 w-auto" />
         </NavLink>
-        <Tile label="Поиск (Ctrl K)" icon={Search} onClick={onSearch} />
+        <Tile label={T('Поиск (Ctrl K)')} icon={Search} onClick={onSearch} />
         <span className="my-0.5 h-px w-8 bg-zinc-200 dark:bg-zinc-700" />
         {NAV.map((n) => (
           <Tile key={n.to} to={n.to} end={n.end} label={n.label} icon={n.icon} badge={counts[n.to]} />
@@ -104,6 +120,7 @@ export function Dock({ onSearch }: { onSearch(): void }) {
           icon={t.icon}
           onClick={() => setTheme(THEMES[(THEMES.indexOf(t) + 1) % THEMES.length].v)}
         />
+        <LangTile />
       </nav>
     </aside>
   )

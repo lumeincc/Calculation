@@ -1,4 +1,5 @@
 import type { DocKind } from './types'
+import { T } from '@/i18n'
 
 const BY_EXT: Record<string, DocKind> = {
   pdf: 'pdf',
@@ -47,16 +48,16 @@ export function kindOf(name: string, data?: Uint8Array): DocKind {
 
 export const KIND_LABEL: Record<DocKind, string> = {
   pdf: 'PDF',
-  sheet: 'Таблица',
+  sheet: T('Таблица'),
   docx: 'Word',
-  odt: 'Документ ODT',
-  image: 'Изображение',
-  text: 'Текст',
-  dxf: 'Чертёж DXF',
-  archive: 'Архив',
+  odt: T('Документ ODT'),
+  image: T('Изображение'),
+  text: T('Текст'),
+  dxf: T('Чертёж DXF'),
+  archive: T('Архив'),
   cad: 'CAD/BIM',
-  other: 'Файл',
+  other: T('Файл'),
 }
 
 export const SUPPORTED_HINT =
-  'PDF, Excel (XLSX, XLS, ODS, CSV), Word (DOCX), ODT, изображения, TXT/XML/JSON, чертежи DXF; архивы ZIP, RAR, 7Z, TAR, GZ — в том числе вложенные'
+  T('PDF, Excel (XLSX, XLS, ODS, CSV), Word (DOCX), ODT, изображения, TXT/XML/JSON, чертежи DXF; архивы ZIP, RAR, 7Z, TAR, GZ — в том числе вложенные')

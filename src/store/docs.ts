@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { analyzeDoc } from '@/docs/analyze'
 import type { DocAnalysis, DocFile } from '@/docs/types'
 import { unpackAll, type InputFile } from '@/docs/unpack'
+import { T } from '@/i18n'
 
 interface DocsState {
   files: DocFile[]
@@ -32,7 +33,7 @@ export const useDocs = create<DocsState>()((set, get) => ({
 
   async ingest(inputs) {
     if (!inputs.length) return
-    set({ busy: true, progress: { done: 0, total: inputs.length, label: 'Чтение файлов…' } })
+    set({ busy: true, progress: { done: 0, total: inputs.length, label: T('Чтение файлов…') } })
     try {
       const { files, warnings } = await unpackAll(inputs, {
         sevenZip: async (data, ext) => (await import('@/docs/sevenzip')).extractWith7z(data, ext),
@@ -45,7 +46,7 @@ export const useDocs = create<DocsState>()((set, get) => ({
         analyses: { ...s.analyses, ...pending },
         warnings: [...s.warnings, ...warnings],
         selectedId: s.selectedId ?? files.find((f) => f.kind !== 'archive')?.id ?? null,
-        progress: { done: 0, total: files.length, label: 'Анализ документов…' },
+        progress: { done: 0, total: files.length, label: T('Анализ документов…') },
       }))
       let done = 0
       for (const f of files) {

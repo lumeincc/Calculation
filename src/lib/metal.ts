@@ -4,24 +4,25 @@
  */
 import { ANGLES_EQUAL, BEAM_HB, BEAMS, CHANNEL_B, CHANNELS, METAL_MATERIALS, STEEL_DENSITY, geo, rebarKgPerM } from '@/data/metals'
 import { pos } from './num'
+import { T, Tf } from '@/i18n'
 
 export type ProfileType =
   | 'sheet' | 'round' | 'square' | 'hex' | 'strip' | 'pipe' | 'profilePipe'
   | 'angle' | 'channel' | 'beam' | 'rebar' | 'custom'
 
 export const PROFILE_LABEL: Record<ProfileType, string> = {
-  sheet: 'Лист',
-  round: 'Круг (пруток)',
-  square: 'Квадрат',
-  hex: 'Шестигранник',
-  strip: 'Полоса',
-  pipe: 'Труба круглая',
-  profilePipe: 'Труба профильная',
-  angle: 'Уголок',
-  channel: 'Швеллер',
-  beam: 'Двутавр',
-  rebar: 'Арматура',
-  custom: 'Свой профиль',
+  sheet: T('Лист'),
+  round: T('Круг (пруток)'),
+  square: T('Квадрат'),
+  hex: T('Шестигранник'),
+  strip: T('Полоса'),
+  pipe: T('Труба круглая'),
+  profilePipe: T('Труба профильная'),
+  angle: T('Уголок'),
+  channel: T('Швеллер'),
+  beam: T('Двутавр'),
+  rebar: T('Арматура'),
+  custom: T('Свой профиль'),
 }
 
 export const PROFILE_PRICE_KEY: Record<ProfileType, string> = {
@@ -96,7 +97,7 @@ export function profileName(p: ProfileSpec): string {
   const a = fmtDim(pos(p.a)), b = fmtDim(pos(p.b) || pos(p.a)), s = fmtDim(pos(p.s))
   const label = PROFILE_LABEL[p.type]
   switch (p.type) {
-    case 'sheet': return `${label} ${s} мм`
+    case 'sheet': return Tf('{0} {1} мм', [label, s])
     case 'round': return `${label} ⌀${a}`
     case 'square': return `${label} ${a}×${a}`
     case 'hex': return `${label} S${a}`
@@ -107,7 +108,7 @@ export function profileName(p: ProfileSpec): string {
     case 'channel': return `${label} ${p.size ?? ''}`.trim()
     case 'beam': return `${label} ${p.size ?? ''}`.trim()
     case 'rebar': return `${label} ⌀${a}`
-    case 'custom': return `${label} (${fmtDim(pos(p.kgPerM))} кг/м)`
+    case 'custom': return Tf('{0} ({1} кг/м)', [label, fmtDim(pos(p.kgPerM))])
   }
 }
 
@@ -156,14 +157,14 @@ export function paintArea(p: ProfileSpec, massKg: number): number {
 export type MetalPriceGroup = 'profilePipe' | 'pipe' | 'angle' | 'channel' | 'beam' | 'sheet' | 'round' | 'rebar'
 
 export const PRICE_GROUP_LABEL: Record<MetalPriceGroup, string> = {
-  profilePipe: 'Труба профильная',
-  pipe: 'Труба круглая',
-  angle: 'Уголок',
-  channel: 'Швеллер',
-  beam: 'Двутавр',
-  sheet: 'Лист и полоса',
-  round: 'Круг, квадрат, шестигранник',
-  rebar: 'Арматура',
+  profilePipe: T('Труба профильная'),
+  pipe: T('Труба круглая'),
+  angle: T('Уголок'),
+  channel: T('Швеллер'),
+  beam: T('Двутавр'),
+  sheet: T('Лист и полоса'),
+  round: T('Круг, квадрат, шестигранник'),
+  rebar: T('Арматура'),
 }
 
 export function priceGroupOf(type: ProfileType): MetalPriceGroup {

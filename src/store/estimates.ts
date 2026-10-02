@@ -5,6 +5,7 @@ import {
   type Estimate, type EstimateItem, type EstimateSection, type EstimateSettings,
 } from '@/lib/estimate'
 import { uid } from '@/lib/id'
+import { T } from '@/i18n'
 
 type Dir = -1 | 1
 
@@ -70,7 +71,7 @@ export const useEstimates = create<EstimatesState>()(
         patch: (id, p) => update(id, (e) => ({ ...e, ...p })),
         setSettings: (id, p) => update(id, (e) => ({ ...e, settings: { ...e.settings, ...p } })),
         setLast: (id) => set({ lastId: id }),
-        addSection(id, name = 'Новый раздел') {
+        addSection(id, name = T('Новый раздел')) {
           const sec = createSection(name)
           update(id, (e) => ({ ...e, sections: [...e.sections, sec] }))
           return sec.id
@@ -86,7 +87,7 @@ export const useEstimates = create<EstimatesState>()(
             const exists = target && e.sections.some((s) => s.id === target)
             if (!exists) {
               const empty = e.sections.length === 1 && e.sections[0].items.length === 0
-              const sec = createSection(sectionName ?? 'Новый раздел', created)
+              const sec = createSection(sectionName ?? T('Новый раздел'), created)
               target = sec.id
               // Replace the untouched default section instead of leaving it empty.
               return { ...e, sections: empty ? [sec] : [...e.sections, sec] }

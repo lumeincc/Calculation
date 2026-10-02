@@ -2,6 +2,7 @@ import { Cuboid } from 'lucide-react'
 import { ceil, pos, round } from '@/lib/num'
 import { defineCalculator, opts, type CalcResult, type MaterialLine } from '../types'
 import { withWaste } from '../common'
+import { T, Tf } from '@/i18n'
 
 /**
  * Пропорции Ц:П:Щ по массе для цемента М400 и М500 и ориентировочное В/Ц.
@@ -78,20 +79,20 @@ export function computeConcrete(v: ConcreteValues): CalcResult {
   const geo = concreteGeometry(v)
   const volume = withWaste(geo.volume, v.waste)
   const mix = concreteMix(v.grade, v.cement)
-  const gradeLabel = `${v.grade.replace('M', 'М')} (${mix.cls})`
+  const gradeLabel = `${v.grade.replace('M', T('М'))} (${mix.cls})`
   const metrics: CalcResult['metrics'] = [
-    { label: 'Объём бетона с запасом', value: volume, unit: 'м³', digits: 2, primary: true },
-    { label: 'Объём конструкции', value: geo.volume, unit: 'м³', digits: 3 },
-    { label: 'Масса бетона', value: (volume * CONCRETE_DENSITY) / 1000, unit: 'т', digits: 2, primary: true },
+    { label: T('Объём бетона с запасом'), value: volume, unit: T('м³'), digits: 2, primary: true },
+    { label: T('Объём конструкции'), value: geo.volume, unit: T('м³'), digits: 3 },
+    { label: T('Масса бетона'), value: (volume * CONCRETE_DENSITY) / 1000, unit: T('т'), digits: 2, primary: true },
   ]
   const lines: MaterialLine[] = []
   const warnings: string[] = []
 
   if (v.supply === 'ready') {
     const trips = ceil(volume / Math.max(1, pos(v.mixer)))
-    metrics.push({ label: `Рейсов миксера по ${pos(v.mixer)} м³`, value: trips, unit: 'рейс', digits: 0, primary: true })
-    lines.push({ name: `Бетон товарный ${gradeLabel}`, unit: 'м³', qty: round(volume, 2), kind: 'material', priceKey: `concrete-${v.grade}` })
-    lines.push({ name: 'Доставка бетона миксером', unit: 'рейс', qty: trips, kind: 'transport', priceKey: 'mixer-trip' })
+    metrics.push({ label: Tf('Рейсов миксера по {0} м³', [pos(v.mixer)]), value: trips, unit: T('рейс'), digits: 0, primary: true })
+    lines.push({ name: Tf('Бетон товарный {0}', [gradeLabel]), unit: T('м³'), qty: round(volume, 2), kind: 'material', priceKey: `concrete-${v.grade}` })
+    lines.push({ name: T('Доставка бетона миксером'), unit: T('рейс'), qty: trips, kind: 'transport', priceKey: 'mixer-trip' })
   } else {
     const bag = Math.max(1, pos(v.bag))
     const cementKg = mix.cementKg * volume
@@ -99,42 +100,42 @@ export function computeConcrete(v: ConcreteValues): CalcResult {
     const sandM3 = (mix.sandKg * volume) / SAND_DENSITY
     const gravelM3 = (mix.gravelKg * volume) / GRAVEL_DENSITY
     metrics.push(
-      { label: `Цемент ${v.cement === 'm500' ? 'М500' : 'М400'}`, value: cementKg, unit: 'кг', digits: 0, primary: true },
-      { label: `Мешков по ${bag} кг`, value: bags, unit: 'шт', digits: 0, primary: true },
-      { label: 'Песок', value: sandM3, unit: 'м³', digits: 2, hint: `${round((mix.sandKg * volume) / 1000, 2)} т` },
-      { label: 'Щебень', value: gravelM3, unit: 'м³', digits: 2, hint: `${round((mix.gravelKg * volume) / 1000, 2)} т` },
-      { label: 'Вода', value: mix.waterL * volume, unit: 'л', digits: 0 },
-      { label: 'Цемента на 1 м³', value: mix.cementKg, unit: 'кг', digits: 0 },
+      { label: Tf('Цемент {0}', [v.cement === 'm500' ? 'М500' : 'М400']), value: cementKg, unit: T('кг'), digits: 0, primary: true },
+      { label: Tf('Мешков по {0} кг', [bag]), value: bags, unit: T('шт'), digits: 0, primary: true },
+      { label: T('Песок'), value: sandM3, unit: T('м³'), digits: 2, hint: Tf('{0} т', [round((mix.sandKg * volume) / 1000, 2)]) },
+      { label: T('Щебень'), value: gravelM3, unit: T('м³'), digits: 2, hint: Tf('{0} т', [round((mix.gravelKg * volume) / 1000, 2)]) },
+      { label: T('Вода'), value: mix.waterL * volume, unit: T('л'), digits: 0 },
+      { label: T('Цемента на 1 м³'), value: mix.cementKg, unit: T('кг'), digits: 0 },
     )
     lines.push(
-      { name: `Цемент ${v.cement === 'm500' ? 'ПЦ500' : 'ПЦ400'}, мешок ${bag} кг`, unit: 'мешок', qty: bags, kind: 'material', priceKey: 'cement', priceFactor: bag },
-      { name: 'Песок строительный', unit: 'м³', qty: round(sandM3, 2), kind: 'material', priceKey: 'bulk-sand' },
-      { name: 'Щебень гранитный 5–20', unit: 'м³', qty: round(gravelM3, 2), kind: 'material', priceKey: 'bulk-gravel-granite' },
+      { name: Tf('Цемент {0}, мешок {1} кг', [v.cement === 'm500' ? 'ПЦ500' : 'ПЦ400', bag]), unit: T('мешок'), qty: bags, kind: 'material', priceKey: 'cement', priceFactor: bag },
+      { name: T('Песок строительный'), unit: T('м³'), qty: round(sandM3, 2), kind: 'material', priceKey: 'bulk-sand' },
+      { name: T('Щебень гранитный 5–20'), unit: T('м³'), qty: round(gravelM3, 2), kind: 'material', priceKey: 'bulk-gravel-granite' },
     )
-    if (volume > 3) warnings.push('Для объёма больше 3 м³ обычно выгоднее заказать товарный бетон: замес вручную не даёт монолитной заливки.')
+    if (volume > 3) warnings.push(T('Для объёма больше 3 м³ обычно выгоднее заказать товарный бетон: замес вручную не даёт монолитной заливки.'))
   }
 
   if (v.formwork && geo.formwork > 0) {
-    metrics.push({ label: 'Площадь опалубки', value: geo.formwork, unit: 'м²', digits: 1 })
-    lines.push({ name: 'Щиты / доска для опалубки', unit: 'м²', qty: round(geo.formwork, 1), kind: 'material', priceKey: 'formwork-board' })
+    metrics.push({ label: T('Площадь опалубки'), value: geo.formwork, unit: T('м²'), digits: 1 })
+    lines.push({ name: T('Щиты / доска для опалубки'), unit: T('м²'), qty: round(geo.formwork, 1), kind: 'material', priceKey: 'formwork-board' })
   }
   if (v.works) {
-    lines.push({ name: 'Бетонирование конструкций', unit: 'м³', qty: round(geo.volume, 2), kind: 'work', priceKey: 'work-concrete' })
+    lines.push({ name: T('Бетонирование конструкций'), unit: T('м³'), qty: round(geo.volume, 2), kind: 'work', priceKey: 'work-concrete' })
     if (v.formwork && geo.formwork > 0)
-      lines.push({ name: 'Устройство и разборка опалубки', unit: 'м²', qty: round(geo.formwork, 1), kind: 'work', priceKey: 'work-formwork' })
+      lines.push({ name: T('Устройство и разборка опалубки'), unit: T('м²'), qty: round(geo.formwork, 1), kind: 'work', priceKey: 'work-formwork' })
   }
-  if (geo.volume === 0) warnings.push('Задайте размеры конструкции.')
+  if (geo.volume === 0) warnings.push(T('Задайте размеры конструкции.'))
   return { metrics, lines, warnings }
 }
 
 export const concrete = defineCalculator<ConcreteValues>({
   id: 'concrete',
-  title: 'Бетон и фундамент',
-  short: 'Объём бетона для плиты, ленты и столбов, состав замеса, миксеры, опалубка',
+  title: T('Бетон и фундамент'),
+  short: T('Объём бетона для плиты, ленты и столбов, состав замеса, миксеры, опалубка'),
   category: 'foundation',
   icon: Cuboid,
-  keywords: ['бетон', 'фундамент', 'плита', 'лента', 'ленточный', 'столбы', 'сваи', 'цемент', 'щебень', 'песок', 'миксер', 'опалубка', 'кубы'],
-  sectionName: 'Фундамент',
+  keywords: [T('бетон'), T('фундамент'), T('плита'), T('лента'), T('ленточный'), T('столбы'), T('сваи'), T('цемент'), T('щебень'), T('песок'), T('миксер'), T('опалубка'), T('кубы')],
+  sectionName: T('Фундамент'),
   defaults: {
     shape: 'strip',
     slabL: 10, slabW: 8, slabT: 250,
@@ -146,47 +147,47 @@ export const concrete = defineCalculator<ConcreteValues>({
   },
   groups: [
     {
-      title: 'Конструкция',
+      title: T('Конструкция'),
       fields: [
         {
-          key: 'shape', label: 'Тип', type: 'segmented', span: 6,
-          options: opts([['strip', 'Лента'], ['slab', 'Плита'], ['columns', 'Столбы'], ['volume', 'Объём']]),
+          key: 'shape', label: T('Тип'), type: 'segmented', span: 6,
+          options: opts([['strip', T('Лента')], ['slab', T('Плита')], ['columns', T('Столбы')], ['volume', T('Объём')]]),
         },
-        { key: 'stripL', label: 'Общая длина ленты', hint: 'Периметр + внутренние стены', type: 'number', unit: 'м', step: 0.5, span: 2, visible: (v) => v.shape === 'strip' },
-        { key: 'stripW', label: 'Ширина ленты', type: 'number', unit: 'м', step: 0.05, span: 2, visible: (v) => v.shape === 'strip' },
-        { key: 'stripH', label: 'Высота ленты', type: 'number', unit: 'м', step: 0.05, span: 2, visible: (v) => v.shape === 'strip' },
-        { key: 'slabL', label: 'Длина', type: 'number', unit: 'м', step: 0.1, span: 2, visible: (v) => v.shape === 'slab' },
-        { key: 'slabW', label: 'Ширина', type: 'number', unit: 'м', step: 0.1, span: 2, visible: (v) => v.shape === 'slab' },
-        { key: 'slabT', label: 'Толщина', type: 'number', unit: 'мм', step: 10, span: 2, visible: (v) => v.shape === 'slab' },
-        { key: 'colType', label: 'Сечение', type: 'segmented', options: opts([['round', 'Круглое'], ['square', 'Квадратное']]), span: 6, visible: (v) => v.shape === 'columns' },
-        { key: 'colD', label: 'Диаметр / сторона', type: 'number', unit: 'мм', step: 10, span: 2, visible: (v) => v.shape === 'columns' },
-        { key: 'colH', label: 'Высота (глубина)', type: 'number', unit: 'м', step: 0.1, span: 2, visible: (v) => v.shape === 'columns' },
-        { key: 'colN', label: 'Количество', type: 'number', unit: 'шт', step: 1, span: 2, visible: (v) => v.shape === 'columns' },
-        { key: 'volume', label: 'Объём бетона', type: 'number', unit: 'м³', step: 0.5, visible: (v) => v.shape === 'volume' },
+        { key: 'stripL', label: T('Общая длина ленты'), hint: T('Периметр + внутренние стены'), type: 'number', unit: T('м'), step: 0.5, span: 2, visible: (v) => v.shape === 'strip' },
+        { key: 'stripW', label: T('Ширина ленты'), type: 'number', unit: T('м'), step: 0.05, span: 2, visible: (v) => v.shape === 'strip' },
+        { key: 'stripH', label: T('Высота ленты'), type: 'number', unit: T('м'), step: 0.05, span: 2, visible: (v) => v.shape === 'strip' },
+        { key: 'slabL', label: T('Длина'), type: 'number', unit: T('м'), step: 0.1, span: 2, visible: (v) => v.shape === 'slab' },
+        { key: 'slabW', label: T('Ширина'), type: 'number', unit: T('м'), step: 0.1, span: 2, visible: (v) => v.shape === 'slab' },
+        { key: 'slabT', label: T('Толщина'), type: 'number', unit: T('мм'), step: 10, span: 2, visible: (v) => v.shape === 'slab' },
+        { key: 'colType', label: T('Сечение'), type: 'segmented', options: opts([['round', T('Круглое')], ['square', T('Квадратное')]]), span: 6, visible: (v) => v.shape === 'columns' },
+        { key: 'colD', label: T('Диаметр / сторона'), type: 'number', unit: T('мм'), step: 10, span: 2, visible: (v) => v.shape === 'columns' },
+        { key: 'colH', label: T('Высота (глубина)'), type: 'number', unit: T('м'), step: 0.1, span: 2, visible: (v) => v.shape === 'columns' },
+        { key: 'colN', label: T('Количество'), type: 'number', unit: T('шт'), step: 1, span: 2, visible: (v) => v.shape === 'columns' },
+        { key: 'volume', label: T('Объём бетона'), type: 'number', unit: T('м³'), step: 0.5, visible: (v) => v.shape === 'volume' },
       ],
     },
     {
-      title: 'Бетон',
+      title: T('Бетон'),
       fields: [
         {
-          key: 'grade', label: 'Марка (класс)', type: 'select',
-          options: CONCRETE_GRADES.map((g) => ({ value: g.grade, label: `${g.grade.replace('M', 'М')} (${g.cls})` })),
+          key: 'grade', label: T('Марка (класс)'), type: 'select',
+          options: CONCRETE_GRADES.map((g) => ({ value: g.grade, label: `${g.grade.replace('M', T('М'))} (${g.cls})` })),
         },
-        { key: 'waste', label: 'Запас на потери', type: 'number', unit: '%', step: 1 },
-        { key: 'supply', label: 'Поставка', type: 'segmented', span: 6, options: opts([['ready', 'Товарный бетон'], ['self', 'Замес на месте']]) },
-        { key: 'mixer', label: 'Объём миксера', type: 'select', options: opts([[5, '5 м³'], [7, '7 м³'], [9, '9 м³'], [10, '10 м³'], [12, '12 м³']]), visible: (v) => v.supply === 'ready' },
-        { key: 'cement', label: 'Цемент', type: 'select', options: opts([['m500', 'М500 (ЦЕМ I 42,5)'], ['m400', 'М400 (ЦЕМ II 32,5)']]), visible: (v) => v.supply === 'self' },
-        { key: 'bag', label: 'Мешок цемента', type: 'select', options: opts([[25, '25 кг'], [40, '40 кг'], [50, '50 кг']]), visible: (v) => v.supply === 'self' },
-        { key: 'formwork', label: 'Считать опалубку', type: 'toggle' },
-        { key: 'works', label: 'Добавить работы', type: 'toggle' },
+        { key: 'waste', label: T('Запас на потери'), type: 'number', unit: '%', step: 1 },
+        { key: 'supply', label: T('Поставка'), type: 'segmented', span: 6, options: opts([['ready', T('Товарный бетон')], ['self', T('Замес на месте')]]) },
+        { key: 'mixer', label: T('Объём миксера'), type: 'select', options: opts([[5, '5 м³'], [7, '7 м³'], [9, '9 м³'], [10, '10 м³'], [12, '12 м³']]), visible: (v) => v.supply === 'ready' },
+        { key: 'cement', label: T('Цемент'), type: 'select', options: opts([['m500', T('М500 (ЦЕМ I 42,5)')], ['m400', T('М400 (ЦЕМ II 32,5)')]]), visible: (v) => v.supply === 'self' },
+        { key: 'bag', label: T('Мешок цемента'), type: 'select', options: opts([[25, '25 кг'], [40, '40 кг'], [50, '50 кг']]), visible: (v) => v.supply === 'self' },
+        { key: 'formwork', label: T('Считать опалубку'), type: 'toggle' },
+        { key: 'works', label: T('Добавить работы'), type: 'toggle' },
       ],
     },
   ],
   compute: computeConcrete,
   method: [
-    'Лента: V = L × b × h; плита: V = a × b × t; столбы: V = S сечения × h × n.',
-    'Опалубка: две боковые стороны ленты, торцы плиты, боковая поверхность столбов.',
-    'Состав замеса — по массовым пропорциям Ц:П:Щ для выбранной марки и цемента при плотности смеси 2400 кг/м³. Насыпная плотность песка 1,6 т/м³, щебня 1,45 т/м³.',
-    'Запас на потери (растекание, неровность основания) обычно 2–5%.',
+    T('Лента: V = L × b × h; плита: V = a × b × t; столбы: V = S сечения × h × n.'),
+    T('Опалубка: две боковые стороны ленты, торцы плиты, боковая поверхность столбов.'),
+    T('Состав замеса — по массовым пропорциям Ц:П:Щ для выбранной марки и цемента при плотности смеси 2400 кг/м³. Насыпная плотность песка 1,6 т/м³, щебня 1,45 т/м³.'),
+    T('Запас на потери (растекание, неровность основания) обычно 2–5%.'),
   ],
 })

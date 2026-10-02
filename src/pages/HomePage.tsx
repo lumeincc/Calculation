@@ -7,6 +7,7 @@ import { computeTotals } from '@/lib/estimate'
 import { fmtDateTime, money } from '@/lib/format'
 import { useEstimates } from '@/store/estimates'
 import { useSettings } from '@/store/settings'
+import { T } from '@/i18n'
 
 const POPULAR = ['metal', 'concrete', 'rebar', 'masonry', 'bulk', 'roof']
 
@@ -23,19 +24,19 @@ export function HomePage() {
         <div className="animate-glow pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl" />
         <div className="animate-glow pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-zinc-400/10 blur-3xl [animation-delay:-4s]" />
         <div className="stagger relative max-w-3xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Расчёты материалов, тоннаж и сметы — в одном месте</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{T('Расчёты материалов, тоннаж и сметы — в одном месте')}</h1>
           <p className="mt-3 text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
-            {CALCULATORS.length} строительных калькуляторов, спецификация металла по ГОСТ, сметы с НДС, накладными и выгрузкой в Excel. Загрузите архив с проектной документацией — сайт распакует его и найдёт сметы и спецификации.
+            {CALCULATORS.length}  {T('строительных калькуляторов, спецификация металла по ГОСТ, сметы с НДС, накладными и выгрузкой в Excel. Загрузите архив с проектной документацией — сайт распакует его и найдёт сметы и спецификации.')}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <ButtonLink to="/docs" variant="primary">
-              <FolderOpen size={17} /> Загрузить документы
+              <FolderOpen size={17} />  {T('Загрузить документы')}
             </ButtonLink>
-            <Button onClick={() => navigate(`/estimates/${create('Новая смета', defaults)}`)}>
-              <Plus size={17} /> Новая смета
+            <Button onClick={() => navigate(`/estimates/${create(T('Новая смета'), defaults)}`)}>
+              <Plus size={17} />  {T('Новая смета')}
             </Button>
             <ButtonLink to="/calc/metal">
-              <Weight size={17} /> Тоннаж металла
+              <Weight size={17} />  {T('Тоннаж металла')}
             </ButtonLink>
           </div>
         </div>
@@ -43,9 +44,9 @@ export function HomePage() {
 
       <section className="stagger grid gap-4 md:grid-cols-3">
         {[
-          { icon: <Calculator size={20} />, title: '1. Посчитайте', text: 'Бетон, арматура, кирпич, кровля, отделка, грунт и металл — с учётом запаса и ГОСТ.' },
-          { icon: <FileArchive size={20} />, title: '2. Загрузите документы', text: 'PDF, Excel, Word, DXF, ZIP/RAR/7z. Позиции из таблиц и профили металла найдутся сами.' },
-          { icon: <FileSpreadsheet size={20} />, title: '3. Соберите смету', text: 'Наценки, НР, СП, НДС 16%, скидки. Выгрузка в Excel с формулами и печать в PDF.' },
+          { icon: <Calculator size={20} />, title: T('1. Посчитайте'), text: T('Бетон, арматура, кирпич, кровля, отделка, грунт и металл — с учётом запаса и ГОСТ.') },
+          { icon: <FileArchive size={20} />, title: T('2. Загрузите документы'), text: T('PDF, Excel, Word, DXF, ZIP/RAR/7z. Позиции из таблиц и профили металла найдутся сами.') },
+          { icon: <FileSpreadsheet size={20} />, title: T('3. Соберите смету'), text: T('Наценки, НР, СП, НДС 16%, скидки. Выгрузка в Excel с формулами и печать в PDF.') },
         ].map((s) => (
           <div key={s.title} className="lift card p-5">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{s.icon}</div>
@@ -58,8 +59,8 @@ export function HomePage() {
       {recent.length > 0 && (
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Последние сметы</h2>
-            <Link to="/estimates" className="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400">Все сметы</Link>
+            <h2 className="text-lg font-semibold">{T('Последние сметы')}</h2>
+            <Link to="/estimates" className="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400">{T('Все сметы')}</Link>
           </div>
           <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {recent.map((e) => {
@@ -68,7 +69,7 @@ export function HomePage() {
                 <Link key={e.id} to={`/estimates/${e.id}`} className="lift card p-4 transition hover:border-brand-300 dark:hover:border-brand-800">
                   <div className="truncate font-medium">{e.name}</div>
                   <div className="mt-1 text-lg font-semibold tabular-nums">{money(t.total)}</div>
-                  <div className="mt-1 text-xs text-zinc-500">{t.itemsCount} поз. · {fmtDateTime(e.updatedAt)}</div>
+                  <div className="mt-1 text-xs text-zinc-500">{t.itemsCount}  {T('поз. ·')} {fmtDateTime(e.updatedAt)}</div>
                 </Link>
               )
             })}
@@ -78,9 +79,10 @@ export function HomePage() {
 
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Популярные расчёты</h2>
+          <h2 className="text-lg font-semibold">{T('Популярные расчёты')}</h2>
           <Link to="/calc" className="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline dark:text-brand-400">
-            Все калькуляторы <ArrowRight size={14} />
+            
+            {T('Все калькуляторы')} <ArrowRight size={14} />
           </Link>
         </div>
         <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -89,7 +91,7 @@ export function HomePage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Разделы</h2>
+        <h2 className="mb-3 text-lg font-semibold">{T('Разделы')}</h2>
         <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES.map((c) => {
             const n = CALCULATORS.filter((x) => x.category === c.id).length

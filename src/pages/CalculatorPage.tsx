@@ -11,6 +11,7 @@ import { decodeState, encodeState } from '@/lib/share'
 import { useCalcInputs } from '@/store/calcInputs'
 import { toast } from '@/store/toast'
 import { NotFoundPage } from './NotFoundPage'
+import { T } from '@/i18n'
 
 function merge(defaults: Values, saved: unknown): Values {
   if (!saved || typeof saved !== 'object') return defaults
@@ -54,14 +55,14 @@ function CalculatorView({ id }: { id: string }) {
     const url = new URL(window.location.href)
     url.hash = `#/calc/${id}?v=${encodeState(values)}`
     await navigator.clipboard.writeText(url.toString())
-    toast('Ссылка с параметрами расчёта скопирована')
+    toast(T('Ссылка с параметрами расчёта скопирована'))
   }
 
   const Extra = def.Extra
   return (
     <div>
       <div className="mb-2 text-sm text-zinc-500">
-        <Link to="/calc" className="hover:text-zinc-800 dark:hover:text-zinc-200">Калькуляторы</Link>
+        <Link to="/calc" className="hover:text-zinc-800 dark:hover:text-zinc-200">{T('Калькуляторы')}</Link>
         <span className="mx-1.5">/</span>
         <Link to={`/calc?cat=${def.category}`} className="hover:text-zinc-800 dark:hover:text-zinc-200">{category?.title}</Link>
       </div>
@@ -71,10 +72,10 @@ function CalculatorView({ id }: { id: string }) {
         actions={
           <>
             <Button size="sm" variant="ghost" onClick={() => { reset(id); setValues(def.defaults) }}>
-              <RotateCcw size={15} /> Сбросить
+              <RotateCcw size={15} />  {T('Сбросить')}
             </Button>
             <Button size="sm" onClick={share}>
-              <Link2 size={15} /> Поделиться
+              <Link2 size={15} />  {T('Поделиться')}
             </Button>
           </>
         }
@@ -88,8 +89,8 @@ function CalculatorView({ id }: { id: string }) {
           {def.method && (
             <div className="card">
               <button onClick={() => setShowMethod((s) => !s)} className="flex w-full items-center gap-2 px-5 py-3 text-left text-sm font-medium">
-                <BookOpen size={16} className="text-zinc-500" /> Как считаем
-                <span className="ml-auto text-xs text-zinc-500">{showMethod ? 'Скрыть' : 'Показать'}</span>
+                <BookOpen size={16} className="text-zinc-500" />  {T('Как считаем')}
+                <span className="ml-auto text-xs text-zinc-500">{showMethod ? T('Скрыть') : T('Показать')}</span>
               </button>
               {showMethod && (
                 <ul className="list-disc space-y-1.5 border-t border-zinc-100 px-5 py-4 pl-9 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
@@ -108,7 +109,7 @@ function CalculatorView({ id }: { id: string }) {
 
       {related.length > 0 && (
         <div className="mt-10">
-          <h2 className="mb-3 text-sm font-semibold text-zinc-500">Ещё в разделе «{category?.title}»</h2>
+          <h2 className="mb-3 text-sm font-semibold text-zinc-500">{T('Ещё в разделе «')}{category?.title}»</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((c) => (
               <Link key={c.id} to={`/calc/${c.id}`} className="card flex items-center gap-3 p-3 transition hover:border-brand-300 dark:hover:border-brand-800">

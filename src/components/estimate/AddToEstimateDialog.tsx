@@ -8,6 +8,7 @@ import { lineTotal } from '@/lib/estimate'
 import { useEstimates } from '@/store/estimates'
 import { useSettings } from '@/store/settings'
 import { toast } from '@/store/toast'
+import { T, Tf } from '@/i18n'
 
 const NEW = '__new__'
 
@@ -23,7 +24,7 @@ export function AddToEstimateDialog({
 
   const initial = estimates.find((e) => e.id === lastId)?.id ?? estimates[0]?.id ?? NEW
   const [estimateId, setEstimateId] = useState(initial)
-  const [newName, setNewName] = useState(() => `Смета от ${fmtDate(Date.now())}`)
+  const [newName, setNewName] = useState(() => Tf('Смета от {0}', [fmtDate(Date.now())]))
   const [sectionId, setSectionId] = useState(NEW)
   const [sectionName, setSectionName] = useState(defaultSection)
 
@@ -32,10 +33,10 @@ export function AddToEstimateDialog({
   const total = items.reduce((s, it) => s + lineTotal({ qty: it.qty ?? 0, price: it.price ?? 0 }), 0)
 
   const submit = () => {
-    const id = estimateId === NEW || !estimate ? create(newName.trim() || 'Новая смета', defaults) : estimateId
+    const id = estimateId === NEW || !estimate ? create(newName.trim() || T('Новая смета'), defaults) : estimateId
     const existing = sectionId !== NEW && sections.some((s) => s.id === sectionId) ? sectionId : null
     addItems(id, existing, items, sectionName.trim() || defaultSection)
-    toast(`Добавлено ${items.length} ${plural(items.length, ['позиция', 'позиции', 'позиций'])} в смету`, { action: { label: 'Открыть', to: `/estimates/${id}` } })
+    toast(Tf('Добавлено {0} {1} в смету', [items.length, plural(items.length, [T('позиция'), T('позиции'), T('позиций')])]), { action: { label: T('Открыть'), to: `/estimates/${id}` } })
     onClose()
   }
 
@@ -43,42 +44,43 @@ export function AddToEstimateDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title="Добавить в смету"
+      title={T('Добавить в смету')}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Отмена</Button>
+          <Button variant="ghost" onClick={onClose}>{T('Отмена')}</Button>
           <Button variant="primary" onClick={submit} disabled={items.length === 0}>
-            Добавить {items.length} {plural(items.length, ['позицию', 'позиции', 'позиций'])}
+            
+            {T('Добавить')} {items.length} {plural(items.length, [T('позицию'), T('позиции'), T('позиций')])}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <Field label="Смета">
+        <Field label={T('Смета')}>
           <Select
             value={estimateId}
             onChange={(v) => {
               setEstimateId(v)
               setSectionId(NEW)
             }}
-            options={[...estimates.map((e) => ({ value: e.id, label: e.name })), { value: NEW, label: '＋ Новая смета' }]}
+            options={[...estimates.map((e) => ({ value: e.id, label: e.name })), { value: NEW, label: T('＋ Новая смета') }]}
           />
         </Field>
         {estimateId === NEW && (
-          <Field label="Название новой сметы">
+          <Field label={T('Название новой сметы')}>
             <TextInput value={newName} onChange={(e) => setNewName(e.target.value)} />
           </Field>
         )}
-        <Field label="Раздел">
-          <Select value={sectionId} onChange={setSectionId} options={[{ value: NEW, label: '＋ Новый раздел' }, ...sections.map((s) => ({ value: s.id, label: s.name }))]} />
+        <Field label={T('Раздел')}>
+          <Select value={sectionId} onChange={setSectionId} options={[{ value: NEW, label: T('＋ Новый раздел') }, ...sections.map((s) => ({ value: s.id, label: s.name }))]} />
         </Field>
         {sectionId === NEW && (
-          <Field label="Название раздела">
+          <Field label={T('Название раздела')}>
             <TextInput value={sectionName} onChange={(e) => setSectionName(e.target.value)} />
           </Field>
         )}
         <p className="rounded-lg bg-zinc-50 px-3 py-2 text-sm text-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-400">
-          {items.length} {plural(items.length, ['позиция', 'позиции', 'позиций'])} на сумму <b className="text-zinc-900 dark:text-zinc-100">{money(total)}</b>. Цены и количество можно будет изменить в смете.
+          {items.length} {plural(items.length, [T('позиция'), T('позиции'), T('позиций')])}  {T('на сумму')} <b className="text-zinc-900 dark:text-zinc-100">{money(total)}</b>{T('. Цены и количество можно будет изменить в смете.')}
         </p>
       </div>
     </Modal>

@@ -1,9 +1,10 @@
+import { T, Tf } from '@/i18n'
 /** Minimal client for the TONNA server API. */
 export class ApiError extends Error {
   status: number
   body: Record<string, unknown>
   constructor(status: number, body: Record<string, unknown>) {
-    super(typeof body.error === 'string' ? body.error : `Ошибка сервера (${status})`)
+    super(typeof body.error === 'string' ? body.error : Tf('Ошибка сервера ({0})', [status]))
     this.status = status
     this.body = body
   }
@@ -44,14 +45,14 @@ export async function apiFetch<T>(base: string, path: string, opts: { method?: s
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
     })
   } catch {
-    throw new ApiError(0, { error: 'Нет связи с сервером' })
+    throw new ApiError(0, { error: T('Нет связи с сервером') })
   }
   const text = await res.text()
   let body: Record<string, unknown> = {}
   try {
     body = text ? JSON.parse(text) : {}
   } catch {
-    body = { error: res.ok ? undefined : 'Сервер недоступен по этому адресу' }
+    body = { error: res.ok ? undefined : T('Сервер недоступен по этому адресу') }
   }
   if (!res.ok) throw new ApiError(res.status, body)
   return body as T

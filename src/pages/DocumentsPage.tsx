@@ -25,6 +25,7 @@ import { useMetalSpec } from '@/store/metalSpec'
 import { priceOf, usePrices } from '@/store/prices'
 import { useSettings } from '@/store/settings'
 import { toast } from '@/store/toast'
+import { T, Tf } from '@/i18n'
 
 type Tab = 'summary' | 'files' | 'positions' | 'metal' | 'search'
 
@@ -42,9 +43,9 @@ const ICON: Record<DocKind, ReactNode> = {
 }
 
 function sizeLabel(n: number) {
-  if (n < 1024) return `${n} Б`
-  if (n < 1024 * 1024) return `${fmt(n / 1024, 0)} КБ`
-  return `${fmt(n / 1024 / 1024, 1)} МБ`
+  if (n < 1024) return Tf('{0} Б', [n])
+  if (n < 1024 * 1024) return Tf('{0} КБ', [fmt(n / 1024, 0)])
+  return Tf('{0} МБ', [fmt(n / 1024 / 1024, 1)])
 }
 
 function Status({ status }: { status?: string }) {
@@ -186,8 +187,8 @@ export function DocumentsPage() {
     list.map((p) =>
       // Unpriced metal rows are converted to tonnes and priced from the catalog (₸/т).
       p.metalPriceKey && p.massKg && !p.price
-        ? { kind: p.kind, name: `${p.name} (${fmt(p.qty, 3)} ${p.unit})`, unit: 'т', qty: round(p.massKg / 1000, 4), price: priceOf(p.metalPriceKey, overrides, custom), source: 'docs' }
-        : { kind: p.kind, name: p.name, unit: p.unit || 'шт', qty: round(p.qty, 4), price: round(p.price, 2), source: 'docs' },
+        ? { kind: p.kind, name: `${p.name} (${fmt(p.qty, 3)} ${p.unit})`, unit: T('т'), qty: round(p.massKg / 1000, 4), price: priceOf(p.metalPriceKey, overrides, custom), source: 'docs' }
+        : { kind: p.kind, name: p.name, unit: p.unit || T('шт'), qty: round(p.qty, 4), price: round(p.price, 2), source: 'docs' },
     )
 
   /** New estimate with one section per document section (or per file). */
@@ -197,16 +198,16 @@ export function DocumentsPage() {
     const sections = new Map<string, { name: string; items: Position[] }>()
     for (const p of list) {
       const key = `${p.fileId}|${p.group ?? ''}`
-      const s = sections.get(key) ?? { name: p.group ?? byId.get(p.fileId)?.name ?? 'Позиции', items: [] }
+      const s = sections.get(key) ?? { name: p.group ?? byId.get(p.fileId)?.name ?? T('Позиции'), items: [] }
       s.items.push(p)
       sections.set(key, s)
     }
     const store = useEstimates.getState()
-    const id = store.create(`Импорт: ${docs[0]?.name ?? 'документы'}`, defaults)
+    const id = store.create(Tf('Импорт: {0}', [docs[0]?.name ?? T('документы')]), defaults)
     useEstimates.setState((s) => ({
       estimates: s.estimates.map((e) => (e.id === id ? { ...e, sections: [...sections.values()].map((s) => createSection(s.name, toItems(s.items).map((it) => createItem(it)))) } : e)),
     }))
-    toast(`Создана смета: ${list.length} ${plural(list.length, ['позиция', 'позиции', 'позиций'])}`)
+    toast(Tf('Создана смета: {0} {1}', [list.length, plural(list.length, [T('позиция'), T('позиции'), T('позиций')])]))
     navigate(`/estimates/${id}`)
   }
 
@@ -225,19 +226,19 @@ export function DocumentsPage() {
           source: byId.get(h.fileId)?.name,
         })),
     )
-    toast('Профили добавлены в спецификацию металла', { action: { label: 'Открыть', to: '/calc/metal' } })
+    toast(T('Профили добавлены в спецификацию металла'), { action: { label: T('Открыть'), to: '/calc/metal' } })
   }
 
   if (files.length === 0 && !busy) {
     return (
       <div>
-        <PageHeader title="Документы" subtitle="Загрузите проектную документацию: сметы, спецификации, ведомости, чертежи. Архивы распаковываются автоматически." />
+        <PageHeader title={T('Документы')} subtitle={T('Загрузите проектную документацию: сметы, спецификации, ведомости, чертежи. Архивы распаковываются автоматически.')} />
         <Dropzone onFiles={(f) => void ingest(f)} busy={busy} progress={progress} />
         <div className="stagger mt-6 grid gap-4 md:grid-cols-3">
           {[
-            { icon: <Archive size={18} />, title: 'Архивы любой вложенности', text: 'ZIP, RAR, 7Z, TAR, GZ. Русские имена из архивов Windows (CP866) читаются корректно.' },
-            { icon: <Layers size={18} />, title: 'Таблицы и позиции', text: 'Сайт находит в Excel, PDF и Word таблицы смет и спецификаций: наименование, ед., количество, цену, сумму.' },
-            { icon: <Weight size={18} />, title: 'Тоннаж металла', text: 'Профили «Уголок 50×5», «Швеллер 10П», «Ø12 А500С», «Труба 40×20×2» распознаются, масса считается по ГОСТ.' },
+            { icon: <Archive size={18} />, title: T('Архивы любой вложенности'), text: T('ZIP, RAR, 7Z, TAR, GZ. Русские имена из архивов Windows (CP866) читаются корректно.') },
+            { icon: <Layers size={18} />, title: T('Таблицы и позиции'), text: T('Сайт находит в Excel, PDF и Word таблицы смет и спецификаций: наименование, ед., количество, цену, сумму.') },
+            { icon: <Weight size={18} />, title: T('Тоннаж металла'), text: T('Профили «Уголок 50×5», «Швеллер 10П», «Ø12 А500С», «Труба 40×20×2» распознаются, масса считается по ГОСТ.') },
           ].map((c) => (
             <div key={c.title} className="card p-5">
               <div className="mb-2 text-brand-600">{c.icon}</div>
@@ -253,9 +254,9 @@ export function DocumentsPage() {
   return (
     <div>
       <PageHeader
-        title="Документы"
-        subtitle={`${docs.length} ${plural(docs.length, ['файл', 'файла', 'файлов'])} · обработка в браузере, без загрузки на сервер`}
-        actions={<Button size="sm" variant="danger" onClick={() => confirm('Убрать все документы из списка?') && clear()}><Trash2 size={15} /> Очистить</Button>}
+        title={T('Документы')}
+        subtitle={Tf('{0} {1} · обработка в браузере, без загрузки на сервер', [docs.length, plural(docs.length, [T('файл'), T('файла'), T('файлов')])])}
+        actions={<Button size="sm" variant="danger" onClick={() => confirm(T('Убрать все документы из списка?')) && clear()}><Trash2 size={15} />  {T('Очистить')}</Button>}
       />
       <Dropzone compact onFiles={(f) => void ingest(f)} busy={busy} progress={progress} />
 
@@ -270,11 +271,11 @@ export function DocumentsPage() {
           value={tab}
           onChange={setTab}
           tabs={[
-            { value: 'summary', label: 'Сводка' },
-            { value: 'files', label: <>Файлы <Badge>{docs.length}</Badge></> },
-            { value: 'positions', label: <>Позиции <Badge tone="blue">{positions.length}</Badge></> },
-            { value: 'metal', label: <>Металл <Badge tone="amber">{fmt(metalKg / 1000, 2)} т</Badge></> },
-            { value: 'search', label: <><Search size={14} /> Поиск</> },
+            { value: 'summary', label: T('Сводка') },
+            { value: 'files', label: <>{T('Файлы')} <Badge>{docs.length}</Badge></> },
+            { value: 'positions', label: <>{T('Позиции')} <Badge tone="blue">{positions.length}</Badge></> },
+            { value: 'metal', label: <>{T('Металл')} <Badge tone="amber">{fmt(metalKg / 1000, 2)}  {T('т')}</Badge></> },
+            { value: 'search', label: <><Search size={14} />  {T('Поиск')}</> },
           ]}
         />
       </div>
@@ -283,19 +284,19 @@ export function DocumentsPage() {
         {tab === 'summary' && (
           <div className="space-y-5">
             <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <Stat label="Документов" value={docs.length} hint={Object.entries(counts).map(([k, n]) => `${DOC_KIND[k as DocKind]}: ${n}`).join(' · ')} />
-              <Stat label="Найдено позиций" value={positions.length} hint={`на ${money(positions.reduce((s, p) => s + p.sum, 0))}`} />
-              <Stat label="Металл" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={`${activeSources.size} из ${sourceInfo.sources.length} документов, без дублей`} />
-              <Stat label="Таблиц" value={docs.reduce((s, f) => s + (analyses[f.id]?.tables.length ?? 0), 0)} hint={`${docs.reduce((s, f) => s + (analyses[f.id]?.pages ?? 0), 0)} стр. PDF`} />
+              <Stat label={T('Документов')} value={docs.length} hint={Object.entries(counts).map(([k, n]) => `${DOC_KIND[k as DocKind]}: ${n}`).join(' · ')} />
+              <Stat label={T('Найдено позиций')} value={positions.length} hint={Tf('на {0}', [money(positions.reduce((s, p) => s + p.sum, 0))])} />
+              <Stat label={T('Металл')} value={fmt(metalKg / 1000, 3)} unit={T('т')} accent hint={Tf('{0} из {1} документов, без дублей', [activeSources.size, sourceInfo.sources.length])} />
+              <Stat label={T('Таблиц')} value={docs.reduce((s, f) => s + (analyses[f.id]?.tables.length ?? 0), 0)} hint={Tf('{0} стр. PDF', [docs.reduce((s, f) => s + (analyses[f.id]?.pages ?? 0), 0)])} />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="primary" disabled={!positions.length} onClick={importAsNewEstimate}><FilePlus2 size={16} /> Создать смету из позиций</Button>
-              <Button disabled={!metal.length} onClick={metalToSpec}><ListPlus size={16} /> Металл → спецификация</Button>
-              <Button onClick={() => setTab('files')}><FolderOpen size={16} /> Открыть файлы</Button>
+              <Button variant="primary" disabled={!positions.length} onClick={importAsNewEstimate}><FilePlus2 size={16} />  {T('Создать смету из позиций')}</Button>
+              <Button disabled={!metal.length} onClick={metalToSpec}><ListPlus size={16} />  {T('Металл → спецификация')}</Button>
+              <Button onClick={() => setTab('files')}><FolderOpen size={16} />  {T('Открыть файлы')}</Button>
             </div>
             {errors.length > 0 && (
               <div className="card p-4">
-                <h3 className="mb-2 text-sm font-semibold">Не удалось прочитать</h3>
+                <h3 className="mb-2 text-sm font-semibold">{T('Не удалось прочитать')}</h3>
                 {errors.map((f) => <div key={f.id} className="text-sm"><b>{f.path}</b>: <span className="text-red-600">{analyses[f.id]?.error}</span></div>)}
               </div>
             )}
@@ -306,9 +307,9 @@ export function DocumentsPage() {
                   <button key={f.id} onClick={() => { select(f.id); setTab('files') }} className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                     {ICON[f.kind]}
                     <span className="min-w-0 flex-1 truncate" title={f.path}>{f.path}</span>
-                    {a?.positions.length ? <Badge tone="blue">{a.positions.length} поз.</Badge> : null}
-                    {a?.metal.length ? <Badge tone="amber">{a.metal.length} проф.</Badge> : null}
-                    {a?.pages ? <span className="text-xs text-zinc-500">{a.pages} стр.</span> : null}
+                    {a?.positions.length ? <Badge tone="blue">{a.positions.length}  {T('поз.')}</Badge> : null}
+                    {a?.metal.length ? <Badge tone="amber">{a.metal.length}  {T('проф.')}</Badge> : null}
+                    {a?.pages ? <span className="text-xs text-zinc-500">{a.pages}  {T('стр.')}</span> : null}
                     <span className="w-16 text-right text-xs text-zinc-500">{sizeLabel(f.size)}</span>
                     <Status status={a?.status} />
                   </button>
@@ -330,19 +331,19 @@ export function DocumentsPage() {
                     {ICON[selected.kind]}
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium" title={selected.path}>{selected.name}</div>
-                      <div className="truncate text-xs text-zinc-500">{DOC_KIND[selected.kind]} · {sizeLabel(selected.size)}{analyses[selected.id]?.positions.length ? ` · ${analyses[selected.id].positions.length} позиций` : ''}</div>
+                      <div className="truncate text-xs text-zinc-500">{DOC_KIND[selected.kind]} · {sizeLabel(selected.size)}{analyses[selected.id]?.positions.length ? Tf(' · {0} позиций', [analyses[selected.id].positions.length]) : ''}</div>
                     </div>
-                    <IconButton label="Скачать" onClick={() => downloadBytes(selected.data, selected.name)}><Download size={16} /></IconButton>
-                    <IconButton label="Убрать из списка" onClick={() => remove(selected.id)}><Trash2 size={16} /></IconButton>
+                    <IconButton label={T('Скачать')} onClick={() => downloadBytes(selected.data, selected.name)}><Download size={16} /></IconButton>
+                    <IconButton label={T('Убрать из списка')} onClick={() => remove(selected.id)}><Trash2 size={16} /></IconButton>
                   </div>
                   {analyses[selected.id]?.notes?.length && selected.kind !== 'cad' && selected.kind !== 'other' ? (
                     <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">{analyses[selected.id]!.notes!.join(' ')}</div>
                   ) : null}
-                  {analyses[selected.id]?.status === 'error' && <div className="px-4 py-2 text-sm text-red-600">Ошибка: {analyses[selected.id]?.error}</div>}
+                  {analyses[selected.id]?.status === 'error' && <div className="px-4 py-2 text-sm text-red-600">{T('Ошибка:')} {analyses[selected.id]?.error}</div>}
                   <DocViewer key={selected.id} file={selected} analysis={analyses[selected.id]} />
                   {selected.kind === 'pdf' && (analyses[selected.id]?.positions.length ?? 0) > 0 && (
                     <details className="border-t border-zinc-200 dark:border-zinc-800">
-                      <summary className="cursor-pointer px-4 py-2 text-sm font-medium">Извлечённые таблицы</summary>
+                      <summary className="cursor-pointer px-4 py-2 text-sm font-medium">{T('Извлечённые таблицы')}</summary>
                       {analyses[selected.id]!.tables.map((t) => (
                         <div key={t.title}>
                           <div className="px-4 py-1 text-xs text-zinc-500">{t.title}</div>
@@ -353,7 +354,7 @@ export function DocumentsPage() {
                   )}
                 </>
               ) : (
-                <p className="p-10 text-center text-sm text-zinc-500">Выберите файл слева</p>
+                <p className="p-10 text-center text-sm text-zinc-500">{T('Выберите файл слева')}</p>
               )}
             </div>
           </div>
@@ -361,20 +362,20 @@ export function DocumentsPage() {
 
         {tab === 'positions' && (
           positions.length === 0 ? (
-            <EmptyState icon={<Layers size={28} />} title="Позиции не найдены" text="Сайт ищет таблицы с колонками «Наименование» и «Количество», «Сумма» или «Масса». Проверьте, что в документе есть такой заголовок." />
+            <EmptyState icon={<Layers size={28} />} title={T('Позиции не найдены')} text={T('Сайт ищет таблицы с колонками «Наименование» и «Количество», «Сумма» или «Масса». Проверьте, что в документе есть такой заголовок.')} />
           ) : (
             <div className="card overflow-hidden">
               <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">Выбрано {selectedPositions.size} из {positions.length}</span>
+                <span className="text-sm text-zinc-600 dark:text-zinc-400">{T('Выбрано')} {selectedPositions.size}  {T('из')} {positions.length}</span>
                 <div className="ml-auto flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => exportTableXlsx('Позиции из документов', 'Позиции', ['Файл', 'Источник', 'Раздел', 'Наименование', 'Тип', 'Ед.', 'Кол-во', 'Цена', 'Сумма', 'Масса, кг'], positions.map((p) => [byId.get(p.fileId)?.name ?? '', p.source, p.group ?? '', p.name, KIND_LABEL[p.kind].one, p.unit, p.qty, p.price, p.sum, p.massKg ?? null]), [24, 12, 24, 60, 12, 8, 10, 12, 14, 12])}>
+                  <Button size="sm" onClick={() => exportTableXlsx(T('Позиции из документов'), T('Позиции'), [T('Файл'), T('Источник'), T('Раздел'), T('Наименование'), T('Тип'), T('Ед.'), T('Кол-во'), T('Цена'), T('Сумма'), T('Масса, кг')], positions.map((p) => [byId.get(p.fileId)?.name ?? '', p.source, p.group ?? '', p.name, KIND_LABEL[p.kind].one, p.unit, p.qty, p.price, p.sum, p.massKg ?? null]), [24, 12, 24, 60, 12, 8, 10, 12, 14, 12])}>
                     <Download size={15} /> Excel
                   </Button>
                   <Button size="sm" disabled={!selectedPositions.size} onClick={() => setDialog(toItems(positions.filter((p) => selectedPositions.has(p.id))))}>
-                    <FilePlus2 size={15} /> В существующую смету
+                    <FilePlus2 size={15} />  {T('В существующую смету')}
                   </Button>
                   <Button size="sm" variant="primary" disabled={!selectedPositions.size} onClick={importAsNewEstimate}>
-                    <FilePlus2 size={15} /> Новая смета
+                    <FilePlus2 size={15} />  {T('Новая смета')}
                   </Button>
                 </div>
               </div>
@@ -383,14 +384,14 @@ export function DocumentsPage() {
                   <thead className="sticky top-0 bg-zinc-50 text-left text-xs text-zinc-500 dark:bg-zinc-900">
                     <tr>
                       <th className="w-10 px-3 py-2">
-                        <input type="checkbox" className="accent-brand-600" checked={selectedPositions.size === positions.length} onChange={(e) => setChecked(e.target.checked ? null : new Set())} aria-label="Выбрать все" />
+                        <input type="checkbox" className="accent-brand-600" checked={selectedPositions.size === positions.length} onChange={(e) => setChecked(e.target.checked ? null : new Set())} aria-label={T('Выбрать все')} />
                       </th>
-                      <th className="px-2 py-2 font-medium">Наименование</th>
-                      <th className="px-2 py-2 font-medium">Тип</th>
-                      <th className="px-2 py-2 font-medium">Ед.</th>
-                      <th className="px-2 py-2 text-right font-medium">Кол-во</th>
-                      <th className="px-2 py-2 text-right font-medium">Цена</th>
-                      <th className="px-2 py-2 text-right font-medium">Сумма</th>
+                      <th className="px-2 py-2 font-medium">{T('Наименование')}</th>
+                      <th className="px-2 py-2 font-medium">{T('Тип')}</th>
+                      <th className="px-2 py-2 font-medium">{T('Ед.')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('Кол-во')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('Цена')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('Сумма')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -417,7 +418,7 @@ export function DocumentsPage() {
                                 else n.add(p.id)
                                 setChecked(n)
                               }}
-                              aria-label="Выбрать"
+                              aria-label={T('Выбрать')}
                             />
                           </td>
                           <td className="px-2 py-2">
@@ -441,27 +442,28 @@ export function DocumentsPage() {
 
         {tab === 'metal' && (
           allMetal.length === 0 ? (
-            <EmptyState icon={<Weight size={28} />} title="Металлопрокат не найден" text="Загрузите спецификацию металла (КМ, КЖ) в Excel, PDF или Word — профили и масса будут собраны здесь." />
+            <EmptyState icon={<Weight size={28} />} title={T('Металлопрокат не найден')} text={T('Загрузите спецификацию металла (КМ, КЖ) в Excel, PDF или Word — профили и масса будут собраны здесь.')} />
           ) : (
             <div className="space-y-4">
               {hasGross && (
                 <div className="card flex flex-wrap items-center gap-3 p-4">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-semibold">Вес металла</h3>
-                    <p className="text-xs text-zinc-500">Черновой — с учётом отходов на раскрой (для закупки). Где черновой вес не указан, берётся чистовой.</p>
+                    <h3 className="text-sm font-semibold">{T('Вес металла')}</h3>
+                    <p className="text-xs text-zinc-500">{T('Черновой — с учётом отходов на раскрой (для закупки). Где черновой вес не указан, берётся чистовой.')}</p>
                   </div>
                   <div className="w-72">
-                    <Segmented value={weight} onChange={(v) => setWeight(v as 'net' | 'gross')} options={[{ value: 'net', label: 'Чистовой' }, { value: 'gross', label: 'Черновой' }]} />
+                    <Segmented value={weight} onChange={(v) => setWeight(v as 'net' | 'gross')} options={[{ value: 'net', label: T('Чистовой') }, { value: 'gross', label: T('Черновой') }]} />
                   </div>
                 </div>
               )}
               <div className="card p-4">
-                <h3 className="text-sm font-semibold">Какие документы считать</h3>
-                <p className="mt-0.5 mb-3 text-xs text-zinc-500">Один и тот же металл обычно есть в нескольких документах (выборка, реестр, техкарта, чертежи). Документы с одинаковым итогом — дубли; если есть итоговая выборка, считается только она, а остальные служат для сверки.</p>
+                <h3 className="text-sm font-semibold">{T('Какие документы считать')}</h3>
+                <p className="mt-0.5 mb-3 text-xs text-zinc-500">{T('Один и тот же металл обычно есть в нескольких документах (выборка, реестр, техкарта, чертежи). Документы с одинаковым итогом — дубли; если есть итоговая выборка, считается только она, а остальные служат для сверки.')}</p>
                 {sourceInfo.check && (
                   <div className={`mb-3 rounded-lg px-3 py-2 text-sm ${Math.abs(sourceInfo.check.coveredKg - sourceInfo.check.summaryKg) <= 0.02 * sourceInfo.check.summaryKg ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200' : 'bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'}`}>
-                    Сверка: {sourceInfo.check.files} {plural(sourceInfo.check.files, ['документ', 'документа', 'документов'])} без выборки дают <b className="tabular-nums">{fmt(sourceInfo.check.coveredKg / 1000, 3)} т</b>, выборка — <b className="tabular-nums">{fmt(sourceInfo.check.summaryKg / 1000, 3)} т</b>
-                    {' '}(расхождение {fmt((Math.abs(sourceInfo.check.coveredKg - sourceInfo.check.summaryKg) / sourceInfo.check.summaryKg) * 100, 2)}%).
+                    
+                    {T('Сверка:')} {sourceInfo.check.files} {plural(sourceInfo.check.files, [T('документ'), T('документа'), T('документов')])}  {T('без выборки дают')} <b className="tabular-nums">{fmt(sourceInfo.check.coveredKg / 1000, 3)}  {T('т')}</b>{T(', выборка —')} <b className="tabular-nums">{fmt(sourceInfo.check.summaryKg / 1000, 3)}  {T('т')}</b>
+                    {' '}{T('(расхождение')} {fmt((Math.abs(sourceInfo.check.coveredKg - sourceInfo.check.summaryKg) / sourceInfo.check.summaryKg) * 100, 2)}%).
                   </div>
                 )}
                 {(() => {
@@ -479,10 +481,10 @@ export function DocumentsPage() {
                         }}
                       />
                       <span className="min-w-0 flex-1 truncate" title={byId.get(src.fileId)?.path}>{src.name}</span>
-                      {src.summary && <Badge tone="green">выборка</Badge>}
-                      {src.duplicateOf && <Badge tone="amber">дубль «{byId.get(src.duplicateOf)?.name}»</Badge>}
-                      {src.covered && <Badge>для сверки</Badge>}
-                      <span className="w-28 text-right tabular-nums">{fmt(src.kg / 1000, 3)} т</span>
+                      {src.summary && <Badge tone="green">{T('выборка')}</Badge>}
+                      {src.duplicateOf && <Badge tone="amber">{T('дубль «')}{byId.get(src.duplicateOf)?.name}»</Badge>}
+                      {src.covered && <Badge>{T('для сверки')}</Badge>}
+                      <span className="w-28 text-right tabular-nums">{fmt(src.kg / 1000, 3)}  {T('т')}</span>
                     </label>
                   )
                   const main = sourceInfo.sources.filter((x) => !x.covered)
@@ -492,7 +494,7 @@ export function DocumentsPage() {
                       <div className="divide-y divide-zinc-100 dark:divide-zinc-800">{main.map(row)}</div>
                       {rest.length > 0 && (
                         <details className="mt-1 border-t border-zinc-100 pt-1 dark:border-zinc-800">
-                          <summary className="cursor-pointer py-2 text-sm text-zinc-600 dark:text-zinc-400">Остальные документы ({rest.length})</summary>
+                          <summary className="cursor-pointer py-2 text-sm text-zinc-600 dark:text-zinc-400">{T('Остальные документы (')}{rest.length})</summary>
                           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">{rest.map(row)}</div>
                         </details>
                       )}
@@ -502,8 +504,8 @@ export function DocumentsPage() {
               </div>
               {extras.length > 0 && (
                 <div className="card p-4">
-                  <h3 className="text-sm font-semibold">Настил, метизы и прочий металл</h3>
-                  <p className="mt-0.5 mb-2 text-xs text-zinc-500">Позиции без профиля проката, указанные только весом. Входят в общий тоннаж.</p>
+                  <h3 className="text-sm font-semibold">{T('Настил, метизы и прочий металл')}</h3>
+                  <p className="mt-0.5 mb-2 text-xs text-zinc-500">{T('Позиции без профиля проката, указанные только весом. Входят в общий тоннаж.')}</p>
                   <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                     {extras.map((x) => (
                       <label key={x.fileId} className="flex cursor-pointer items-center gap-3 py-2 text-sm">
@@ -519,38 +521,38 @@ export function DocumentsPage() {
                           }}
                         />
                         <span className="min-w-0 flex-1 truncate">{x.name}</span>
-                        <span className="text-xs text-zinc-500">{x.rows} поз.</span>
-                        <span className="w-28 text-right tabular-nums">{fmt(x.kg, 1)} кг</span>
+                        <span className="text-xs text-zinc-500">{x.rows}  {T('поз.')}</span>
+                        <span className="w-28 text-right tabular-nums">{fmt(x.kg, 1)}  {T('кг')}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               )}
               <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <Stat label={weight === 'gross' ? 'Общий тоннаж (черновой)' : 'Общий тоннаж (чистовой)'} value={fmt(metalKg / 1000, 3)} unit="т" accent hint={extraKg ? `прокат ${fmt(profileKg / 1000, 3)} т + прочее ${fmt(extraKg / 1000, 3)} т` : undefined} />
-                <Stat label="Профилей" value={metalGroups.length} />
-                <Stat label="Строк спецификаций" value={metal.length} hint={unknownMass ? `без массы: ${unknownMass}` : undefined} />
-                <Stat label="Стоимость по справочнику" value={money(metalGroups.reduce((s, g) => s + (g.massKg / 1000) * priceOf(g.priceKey, overrides, custom), 0))} />
+                <Stat label={weight === 'gross' ? T('Общий тоннаж (черновой)') : T('Общий тоннаж (чистовой)')} value={fmt(metalKg / 1000, 3)} unit={T('т')} accent hint={extraKg ? Tf('прокат {0} т + прочее {1} т', [fmt(profileKg / 1000, 3), fmt(extraKg / 1000, 3)]) : undefined} />
+                <Stat label={T('Профилей')} value={metalGroups.length} />
+                <Stat label={T('Строк спецификаций')} value={metal.length} hint={unknownMass ? Tf('без массы: {0}', [unknownMass]) : undefined} />
+                <Stat label={T('Стоимость по справочнику')} value={money(metalGroups.reduce((s, g) => s + (g.massKg / 1000) * priceOf(g.priceKey, overrides, custom), 0))} />
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="primary" onClick={metalToSpec}><ListPlus size={16} /> В спецификацию металла</Button>
-                <Button onClick={() => setDialog([...metalGroups.filter((g) => g.massKg > 0).map((g) => ({ kind: 'material' as const, name: g.name, unit: 'т', qty: round(g.massKg / 1000, 4), price: priceOf(g.priceKey, overrides, custom), source: 'docs' })), ...extras.filter((x) => activeExtras.has(x.fileId)).map((x) => ({ kind: 'material' as const, name: x.name.replace(/\.(xlsx?|xls\.xlsx|csv|docx|pdf)$/i, ''), unit: 'т', qty: round(x.kg / 1000, 4), price: 0, source: 'docs' }))])}>
-                  <FilePlus2 size={16} /> В смету (по профилям)
+                <Button variant="primary" onClick={metalToSpec}><ListPlus size={16} />  {T('В спецификацию металла')}</Button>
+                <Button onClick={() => setDialog([...metalGroups.filter((g) => g.massKg > 0).map((g) => ({ kind: 'material' as const, name: g.name, unit: T('т'), qty: round(g.massKg / 1000, 4), price: priceOf(g.priceKey, overrides, custom), source: 'docs' })), ...extras.filter((x) => activeExtras.has(x.fileId)).map((x) => ({ kind: 'material' as const, name: x.name.replace(/\.(xlsx?|xls\.xlsx|csv|docx|pdf)$/i, ''), unit: T('т'), qty: round(x.kg / 1000, 4), price: 0, source: 'docs' }))])}>
+                  <FilePlus2 size={16} />  {T('В смету (по профилям)')}
                 </Button>
-                <Button onClick={() => exportTableXlsx('Металл из документов', 'Металл', ['Профиль', 'Масса 1 м, кг', 'Длина, м', 'Масса, кг', 'Масса, т', 'Строк'], metalGroups.map((g) => [g.name, round(g.kgPerM, 3), round(g.qtyM, 2), round(g.massKg, 2), round(g.massKg / 1000, 4), g.hits.length]), [36, 14, 12, 14, 12, 8])}>
+                <Button onClick={() => exportTableXlsx(T('Металл из документов'), T('Металл'), [T('Профиль'), T('Масса 1 м, кг'), T('Длина, м'), T('Масса, кг'), T('Масса, т'), T('Строк')], metalGroups.map((g) => [g.name, round(g.kgPerM, 3), round(g.qtyM, 2), round(g.massKg, 2), round(g.massKg / 1000, 4), g.hits.length]), [36, 14, 12, 14, 12, 8])}>
                   <Download size={16} /> Excel
                 </Button>
               </div>
-              <MetalCostPanel items={costItems} extraKg={extraKg} title={`Металлоконструкции: ${docs.find((d) => activeSources.has(d.id))?.name.replace(/\.(xlsx?|xls\.xlsx|pdf|csv)$/i, '') ?? 'проект'}`} />
+              <MetalCostPanel items={costItems} extraKg={extraKg} title={Tf('Металлоконструкции: {0}', [docs.find((d) => activeSources.has(d.id))?.name.replace(/\.(xlsx?|xls\.xlsx|pdf|csv)$/i, '') ?? T('проект')])} />
               <div className="card overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
                   <thead className="bg-zinc-50 text-left text-xs text-zinc-500 dark:bg-zinc-900/60">
                     <tr>
-                      <th className="px-4 py-2 font-medium">Профиль</th>
-                      <th className="px-2 py-2 text-right font-medium">кг/м</th>
-                      <th className="px-2 py-2 text-right font-medium">Длина, м</th>
-                      <th className="px-2 py-2 text-right font-medium">Масса, т</th>
-                      <th className="px-4 py-2 font-medium">Источники</th>
+                      <th className="px-4 py-2 font-medium">{T('Профиль')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('кг/м')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('Длина, м')}</th>
+                      <th className="px-2 py-2 text-right font-medium">{T('Масса, т')}</th>
+                      <th className="px-4 py-2 font-medium">{T('Источники')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -563,11 +565,11 @@ export function DocumentsPage() {
                         <td className="px-4 py-2 text-xs text-zinc-500">
                           {g.hits.slice(0, 3).map((h) => (
                             <div key={h.id} className="truncate" title={h.raw}>
-                              {byId.get(h.fileId)?.name}: «{h.raw}» — {h.qty ? `${fmt(h.qty, 3)} ${h.unit}` : `${fmt(h.massKg ?? 0, 2)} кг`}
-                              {h.massKg === null && <span className="ml-1 text-amber-600">масса не определена</span>}
+                              {byId.get(h.fileId)?.name}: «{h.raw}» — {h.qty ? `${fmt(h.qty, 3)} ${h.unit}` : Tf('{0} кг', [fmt(h.massKg ?? 0, 2)])}
+                              {h.massKg === null && <span className="ml-1 text-amber-600">{T('масса не определена')}</span>}
                             </div>
                           ))}
-                          {g.hits.length > 3 && <div>и ещё {g.hits.length - 3}</div>}
+                          {g.hits.length > 3 && <div>{T('и ещё')} {g.hits.length - 3}</div>}
                         </td>
                       </tr>
                     ))}
@@ -582,15 +584,15 @@ export function DocumentsPage() {
           <div>
             <div className="relative mb-4">
               <Search size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
-              <input className="input h-11 pl-10" placeholder="Поиск по тексту всех документов: «В25», «арматура», «итого»…" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
+              <input className="input h-11 pl-10" placeholder={T('Поиск по тексту всех документов: «В25», «арматура», «итого»…')} value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
             </div>
-            {query.trim().length >= 2 && results.length === 0 && <p className="text-sm text-zinc-500">Ничего не найдено</p>}
+            {query.trim().length >= 2 && results.length === 0 && <p className="text-sm text-zinc-500">{T('Ничего не найдено')}</p>}
             <div className="space-y-2">
               {results.map((r) => (
                 <button key={r.file.id} onClick={() => { select(r.file.id); setTab('files') }} className="card block w-full p-3 text-left hover:border-brand-300 dark:hover:border-brand-800">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     {ICON[r.file.kind]} <span className="truncate">{r.file.path}</span>
-                    <Badge className="ml-auto">{r.count} совп.</Badge>
+                    <Badge className="ml-auto">{r.count}  {T('совп.')}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                     …<Highlight text={r.snippet} q={query.trim()} />…
@@ -602,9 +604,9 @@ export function DocumentsPage() {
         )}
       </div>
 
-      {dialog && <AddToEstimateDialog open onClose={() => setDialog(null)} items={dialog} defaultSection="Из документов" />}
+      {dialog && <AddToEstimateDialog open onClose={() => setDialog(null)} items={dialog} defaultSection={T('Из документов')} />}
       <p className="mt-6 flex items-center gap-1 text-xs text-zinc-400">
-        <ChevronRight size={12} /> Позиции и профили распознаются автоматически по заголовкам таблиц — проверьте результат перед отправкой сметы.
+        <ChevronRight size={12} />  {T('Позиции и профили распознаются автоматически по заголовкам таблиц — проверьте результат перед отправкой сметы.')}
       </p>
     </div>
   )

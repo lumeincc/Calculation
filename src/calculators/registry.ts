@@ -13,16 +13,17 @@ import { roof } from './defs/roof'
 import { units } from './defs/units'
 import { insulation, lumber, stairs } from './defs/wood'
 import type { CalculatorDef, CategoryId, Values } from './types'
+import { T } from '@/i18n'
 
 export const CATEGORIES: { id: CategoryId; title: string; icon: LucideIcon }[] = [
-  { id: 'metal', title: 'Металл и тоннаж', icon: Weight },
-  { id: 'foundation', title: 'Фундамент и бетон', icon: Layers },
-  { id: 'walls', title: 'Стены и перегородки', icon: BrickWall },
-  { id: 'finish', title: 'Отделка и полы', icon: Hammer },
-  { id: 'roof', title: 'Кровля', icon: House },
-  { id: 'earth', title: 'Земляные и сыпучие', icon: Shovel },
-  { id: 'wood', title: 'Дерево и лестницы', icon: TreePine },
-  { id: 'tools', title: 'Инструменты', icon: Ruler },
+  { id: 'metal', title: T('Металл и тоннаж'), icon: Weight },
+  { id: 'foundation', title: T('Фундамент и бетон'), icon: Layers },
+  { id: 'walls', title: T('Стены и перегородки'), icon: BrickWall },
+  { id: 'finish', title: T('Отделка и полы'), icon: Hammer },
+  { id: 'roof', title: T('Кровля'), icon: House },
+  { id: 'earth', title: T('Земляные и сыпучие'), icon: Shovel },
+  { id: 'wood', title: T('Дерево и лестницы'), icon: TreePine },
+  { id: 'tools', title: T('Инструменты'), icon: Ruler },
 ]
 
 metal.Extra = MetalSpecPanel

@@ -4,6 +4,7 @@ import { Modal } from '@/components/ui/misc'
 import { PRICE_GROUPS, type PriceEntry } from '@/data/prices'
 import { money } from '@/lib/format'
 import { catalogEntries, priceOf, usePrices } from '@/store/prices'
+import { T } from '@/i18n'
 
 /** Picks an entry from the price catalog to add to an estimate section. */
 export function CatalogPicker({ open, onClose, onPick }: { open: boolean; onClose(): void; onPick(e: PriceEntry, price: number): void }) {
@@ -13,15 +14,15 @@ export function CatalogPicker({ open, onClose, onPick }: { open: boolean; onClos
   const groups = useMemo(() => {
     const ql = q.trim().toLowerCase()
     const list = catalogEntries(custom).filter((e) => !ql || e.name.toLowerCase().includes(ql) || e.group.toLowerCase().includes(ql))
-    const names = [...PRICE_GROUPS, 'Мои позиции']
-    return names.map((g) => ({ g, items: list.filter((e) => (e.key.startsWith('custom-') ? 'Мои позиции' : e.group) === g) })).filter((x) => x.items.length)
+    const names = [...PRICE_GROUPS, T('Мои позиции')]
+    return names.map((g) => ({ g, items: list.filter((e) => (e.key.startsWith('custom-') ? T('Мои позиции') : e.group) === g) })).filter((x) => x.items.length)
   }, [q, custom])
 
   return (
-    <Modal open={open} onClose={onClose} title="Добавить из справочника" wide>
+    <Modal open={open} onClose={onClose} title={T('Добавить из справочника')} wide>
       <div className="relative mb-3">
         <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
-        <input className="input pl-9" placeholder="Поиск: бетон, ГКЛ, монтаж…" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
+        <input className="input pl-9" placeholder={T('Поиск: бетон, ГКЛ, монтаж…')} value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
       </div>
       <div className="space-y-4">
         {groups.map(({ g, items }) => (
@@ -44,7 +45,7 @@ export function CatalogPicker({ open, onClose, onPick }: { open: boolean; onClos
             </ul>
           </div>
         ))}
-        {groups.length === 0 && <p className="py-6 text-center text-sm text-zinc-500">Ничего не найдено</p>}
+        {groups.length === 0 && <p className="py-6 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</p>}
       </div>
     </Modal>
   )

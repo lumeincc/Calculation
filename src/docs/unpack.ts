@@ -8,6 +8,7 @@ import { archiveFormat, extOf, kindOf } from './detect'
 import { readTar } from './tar'
 import type { DocFile } from './types'
 import { readZip, UnsupportedZip } from './zip'
+import { T, Tf } from '@/i18n'
 
 export interface InputFile {
   name: string
@@ -49,12 +50,12 @@ async function extract(file: DocFile, ctx: Ctx): Promise<{ name: string; data: U
     try {
       const entries = readZip(file.data)
       const declared = entries.reduce((s, e) => s + e.size, 0)
-      if (ctx.total + declared > ctx.limits.maxTotalBytes) throw new Error('Распакованный объём превышает лимит')
+      if (ctx.total + declared > ctx.limits.maxTotalBytes) throw new Error(T('Распакованный объём превышает лимит'))
       const out: { name: string; data: Uint8Array }[] = []
       for (const e of entries) {
         if (JUNK.test(e.name)) continue
         if (e.encrypted) {
-          ctx.warnings.push(`${file.path}/${e.name}: файл защищён паролем`)
+          ctx.warnings.push(Tf('{0}/{1}: файл защищён паролем', [file.path, e.name]))
           continue
         }
         out.push({ name: e.name, data: e.read() })
@@ -71,7 +72,7 @@ async function extract(file: DocFile, ctx: Ctx): Promise<{ name: string; data: U
     const name = file.ext === 'tgz' ? file.name.replace(/\.tgz$/i, '.tar') : file.name.replace(/\.gz$/i, '')
     return [{ name: name === file.name ? `${file.name}.out` : name, data: inner }]
   }
-  if (!ctx.sevenZip) throw new Error('Формат архива не поддерживается')
+  if (!ctx.sevenZip) throw new Error(T('Формат архива не поддерживается'))
   return ctx.sevenZip(file.data, file.ext)
 }
 
@@ -79,7 +80,7 @@ async function add(input: InputFile, depth: number, ctx: Ctx, parentId?: string)
   const path = input.path || input.name
   if (JUNK.test(path)) return
   if (ctx.files.length >= ctx.limits.maxFiles) {
-    if (!ctx.limitHit) ctx.warnings.push(`Обработаны первые ${ctx.limits.maxFiles} файлов, остальные пропущены`)
+    if (!ctx.limitHit) ctx.warnings.push(Tf('Обработаны первые {0} файлов, остальные пропущены', [ctx.limits.maxFiles]))
     ctx.limitHit = true
     return
   }
@@ -99,10 +100,10 @@ async function add(input: InputFile, depth: number, ctx: Ctx, parentId?: string)
   ctx.files.push(file)
   if (file.kind !== 'archive') return
   if (depth >= ctx.limits.maxDepth) {
-    ctx.warnings.push(`${path}: слишком глубокая вложенность архивов`)
+    ctx.warnings.push(Tf('{0}: слишком глубокая вложенность архивов', [path]))
     return
   }
-  ctx.onProgress?.(`Распаковка ${name}`)
+  ctx.onProgress?.(Tf('Распаковка {0}', [name]))
   try {
     const children = await extract(file, ctx)
     // The archive itself stays in the tree as a folder; its bytes are no longer needed.
@@ -128,6 +129,6 @@ export async function unpackAll(
     onProgress: opts.onProgress,
   }
   for (const input of inputs) await add(input, 0, ctx)
-  if (ctx.total > ctx.limits.maxTotalBytes) ctx.warnings.push('Общий объём файлов очень большой — браузер может работать медленно')
+  if (ctx.total > ctx.limits.maxTotalBytes) ctx.warnings.push(T('Общий объём файлов очень большой — браузер может работать медленно'))
   return { files: ctx.files, warnings: ctx.warnings }
 }

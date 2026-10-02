@@ -6,6 +6,7 @@
 import type { LucideIcon } from 'lucide-react'
 import type { ComponentType } from 'react'
 import type { ItemKind } from '@/lib/estimate'
+import { T } from '@/i18n'
 
 export type RowValues = Record<string, number | string>
 export type FieldValue = number | string | boolean | RowValues[]
@@ -128,4 +129,4 @@ export function defineCalculator<V extends Values>(def: CalculatorDef<V>): Calcu
 }
 
 export const opts = (pairs: [string | number, string][]): Option[] =>
-  pairs.map(([value, label]) => ({ value: String(value), label }))
+  pairs.map(([value, label]) => ({ value: String(value), label: T(label) }))

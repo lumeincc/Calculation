@@ -13,11 +13,12 @@ import { AccountPage } from '@/pages/AccountPage'
 import { startSync } from '@/lib/sync'
 import { useAuth } from '@/store/auth'
 import { useEffect } from 'react'
+import { T } from '@/i18n'
 
 const DocumentsPage = lazy(() => import('@/pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage })))
 const EstimatePrintPage = lazy(() => import('@/pages/EstimatePrintPage').then((m) => ({ default: m.EstimatePrintPage })))
 
-const fallback = <div className="p-10 text-center text-sm text-zinc-500">Загрузка…</div>
+const fallback = <div className="p-10 text-center text-sm text-zinc-500">{T('Загрузка…')}</div>
 
 // Hash routing keeps the build deployable to any static hosting without rewrites.
 const router = createHashRouter([

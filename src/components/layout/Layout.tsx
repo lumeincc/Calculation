@@ -10,16 +10,17 @@ import { CommandPalette } from './CommandPalette'
 import { Dock } from './Dock'
 import { TonnaLogo } from './TonnaLogo'
 import { Toasts } from './Toasts'
+import { LANGS, lang, setLang, T } from '@/i18n'
 
 const NAV_FULL = [
-  { to: '/', label: 'Главная', icon: Home, end: true },
-  { to: '/calc', label: 'Калькуляторы', icon: Calculator },
-  { to: '/docs', label: 'Документы', icon: FolderOpen },
-  { to: '/estimates', label: 'Сметы', icon: FileSpreadsheet },
-  { to: '/calc/metal', label: 'Тоннаж металла', icon: Weight },
-  { to: '/prices', label: 'Справочник цен', icon: Tags },
-  { to: '/account', label: 'Аккаунт и команда', icon: CircleUserRound },
-  { to: '/settings', label: 'Настройки', icon: Settings },
+  { to: '/', label: T('Главная'), icon: Home, end: true },
+  { to: '/calc', label: T('Калькуляторы'), icon: Calculator },
+  { to: '/docs', label: T('Документы'), icon: FolderOpen },
+  { to: '/estimates', label: T('Сметы'), icon: FileSpreadsheet },
+  { to: '/calc/metal', label: T('Тоннаж металла'), icon: Weight },
+  { to: '/prices', label: T('Справочник цен'), icon: Tags },
+  { to: '/account', label: T('Аккаунт и команда'), icon: CircleUserRound },
+  { to: '/settings', label: T('Настройки'), icon: Settings },
 ]
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
@@ -55,12 +56,12 @@ function ThemeSwitch() {
   const theme = useSettings((s) => s.theme)
   const setTheme = useSettings((s) => s.setTheme)
   const items: { v: Theme; icon: ReactNode; label: string }[] = [
-    { v: 'light', icon: <Sun size={15} />, label: 'Светлая' },
-    { v: 'system', icon: <Monitor size={15} />, label: 'Как в системе' },
-    { v: 'dark', icon: <Moon size={15} />, label: 'Тёмная' },
+    { v: 'light', icon: <Sun size={15} />, label: T('Светлая') },
+    { v: 'system', icon: <Monitor size={15} />, label: T('Как в системе') },
+    { v: 'dark', icon: <Moon size={15} />, label: T('Тёмная') },
   ]
   return (
-    <div className="flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800/70" role="radiogroup" aria-label="Тема">
+    <div className="flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800/70" role="radiogroup" aria-label={T('Тема')}>
       {items.map((i) => (
         <button
           key={i.v}
@@ -72,6 +73,25 @@ function ThemeSwitch() {
           className={`flex h-7 flex-1 items-center justify-center rounded-md transition ${theme === i.v ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-white' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
         >
           {i.icon}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function LangSwitch() {
+  return (
+    <div className="mt-2 flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800/70" role="radiogroup" aria-label={T('Язык')}>
+      {LANGS.map((l) => (
+        <button
+          key={l.value}
+          aria-label={l.label}
+          aria-checked={lang === l.value}
+          role="radio"
+          onClick={() => l.value !== lang && setLang(l.value)}
+          className={`flex h-7 flex-1 items-center justify-center rounded-md text-xs font-semibold transition ${lang === l.value ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-white' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
+        >
+          {l.short}
         </button>
       ))}
     </div>
@@ -114,13 +134,13 @@ export function Layout() {
 
       {/* Mobile top bar */}
       <header className="no-print sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white/90 px-4 backdrop-blur lg:hidden dark:border-zinc-800 dark:bg-zinc-950/90">
-        <button onClick={() => setMenu(true)} aria-label="Меню" className="-ml-1 rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        <button onClick={() => setMenu(true)} aria-label={T('Меню')} className="-ml-1 rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Menu size={20} />
         </button>
-        <Link to="/" aria-label="TONNA — на главную" className="flex items-center gap-2 text-zinc-900 dark:text-white">
+        <Link to="/" aria-label={T('TONNA — на главную')} className="flex items-center gap-2 text-zinc-900 dark:text-white">
           <TonnaLogo className="h-8 w-auto" />
         </Link>
-        <button onClick={() => setPalette(true)} aria-label="Поиск" className="ml-auto rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        <button onClick={() => setPalette(true)} aria-label={T('Поиск')} className="ml-auto rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Search size={19} />
         </button>
       </header>
@@ -131,13 +151,14 @@ export function Layout() {
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white px-3 py-4 shadow-xl dark:bg-zinc-950">
             <div className="mb-5 flex items-center justify-between px-2">
               <TonnaLogo className="h-9 w-auto text-zinc-900 dark:text-white" />
-              <button onClick={() => setMenu(false)} aria-label="Закрыть меню" className="rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+              <button onClick={() => setMenu(false)} aria-label={T('Закрыть меню')} className="rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                 <X size={18} />
               </button>
             </div>
             <NavItems onNavigate={() => setMenu(false)} />
             <div className="mt-auto px-1">
               <ThemeSwitch />
+              <LangSwitch />
             </div>
           </div>
         </div>

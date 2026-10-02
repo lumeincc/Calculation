@@ -5,6 +5,7 @@
 import { round } from './num'
 import { PRICE_GROUP_LABEL, type MetalPriceGroup } from './metal'
 import type { ItemKind } from './estimate'
+import { T, Tf } from '@/i18n'
 
 export interface CostItem {
   group: MetalPriceGroup
@@ -39,7 +40,8 @@ export const DEFAULT_METAL_COST: MetalCostSettings = {
 }
 
 export interface CostLine {
-  section: 'Металл' | 'Работы' | 'Доставка и прочее'
+  /** Section name (translated). */
+  section: string
   kind: ItemKind
   name: string
   unit: string
@@ -81,16 +83,16 @@ export function computeMetalCost(items: CostItem[], extraKg: number, s: MetalCos
   const areaM2 = groups.reduce((a, g) => a + g.areaM2, 0)
   for (const g of groups) {
     const price = s.singlePrice ? s.metalPrice : (s.groupPrices[g.group] ?? 0)
-    add({ section: 'Металл', kind: 'material', name: PRICE_GROUP_LABEL[g.group], unit: 'т', qty: round(g.massKg / 1000, 4), price })
+    add({ section: T('Металл'), kind: 'material', name: PRICE_GROUP_LABEL[g.group], unit: T('т'), qty: round(g.massKg / 1000, 4), price })
   }
-  add({ section: 'Металл', kind: 'material', name: 'Настил, метизы и прочий металл', unit: 'т', qty: round(extraT, 4), price: s.extraPrice })
-  add({ section: 'Работы', kind: 'work', name: 'Изготовление металлоконструкций', unit: 'т', qty: round(profileT, 4), price: s.fabrication })
-  add({ section: 'Работы', kind: 'work', name: 'Окраска металлоконструкций', unit: 'м²', qty: round(areaM2, 2), price: s.paint })
-  add({ section: 'Работы', kind: 'work', name: 'Монтаж металлоконструкций', unit: 'т', qty: round(profileT + extraT, 4), price: s.montage })
-  if (s.delivery > 0) add({ section: 'Доставка и прочее', kind: 'transport', name: 'Доставка', unit: 'усл. ед.', qty: 1, price: s.delivery })
+  add({ section: T('Металл'), kind: 'material', name: T('Настил, метизы и прочий металл'), unit: T('т'), qty: round(extraT, 4), price: s.extraPrice })
+  add({ section: T('Работы'), kind: 'work', name: T('Изготовление металлоконструкций'), unit: T('т'), qty: round(profileT, 4), price: s.fabrication })
+  add({ section: T('Работы'), kind: 'work', name: T('Окраска металлоконструкций'), unit: T('м²'), qty: round(areaM2, 2), price: s.paint })
+  add({ section: T('Работы'), kind: 'work', name: T('Монтаж металлоконструкций'), unit: T('т'), qty: round(profileT + extraT, 4), price: s.montage })
+  if (s.delivery > 0) add({ section: T('Доставка и прочее'), kind: 'transport', name: T('Доставка'), unit: T('усл. ед.'), qty: 1, price: s.delivery })
   const subtotal = round(lines.reduce((a, l) => a + l.sum, 0), 2)
   const markup = round((subtotal * s.markupPct) / 100, 2)
-  if (markup) lines.push({ section: 'Доставка и прочее', kind: 'other', name: `Наценка ${s.markupPct}%`, unit: 'усл. ед.', qty: 1, price: markup, sum: markup })
+  if (markup) lines.push({ section: T('Доставка и прочее'), kind: 'other', name: Tf('Наценка {0}%', [s.markupPct]), unit: T('усл. ед.'), qty: 1, price: markup, sum: markup })
   const total = round(subtotal + markup, 2)
   const tonnes = profileT + extraT
   return { lines, tonnes, areaM2, subtotal, markup, total, perTonne: tonnes > 0 ? round(total / tonnes, 2) : 0 }

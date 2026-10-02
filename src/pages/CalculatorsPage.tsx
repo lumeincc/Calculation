@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router'
 import { CALCULATORS, CATEGORIES, searchCalculators } from '@/calculators/registry'
 import { CalculatorCard } from '@/components/calculator/CalculatorCard'
 import { EmptyState, PageHeader } from '@/components/ui/misc'
+import { T, Tf } from '@/i18n'
 
 export function CalculatorsPage() {
   const [params, setParams] = useSearchParams()
@@ -19,13 +20,13 @@ export function CalculatorsPage() {
   }
   return (
     <div>
-      <PageHeader title="Калькуляторы" subtitle={`${CALCULATORS.length} расчётов: металл, фундамент, стены, отделка, кровля, земляные работы`} />
+      <PageHeader title={T('Калькуляторы')} subtitle={Tf('{0} расчётов: металл, фундамент, стены, отделка, кровля, земляные работы', [CALCULATORS.length])} />
       <div className="relative mb-4">
         <Search size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
-        <input className="input h-11 pl-10" placeholder="Что посчитать? Например: швеллер, газобетон, щебень" value={q} onChange={(e) => update({ q: e.target.value })} autoFocus />
+        <input className="input h-11 pl-10" placeholder={T('Что посчитать? Например: швеллер, газобетон, щебень')} value={q} onChange={(e) => update({ q: e.target.value })} autoFocus />
       </div>
       <div className="stagger mb-6 flex flex-wrap gap-2">
-        <Chip active={!cat} onClick={() => update({ cat: '' })}>Все</Chip>
+        <Chip active={!cat} onClick={() => update({ cat: '' })}>{T('Все')}</Chip>
         {CATEGORIES.map((c) => (
           <Chip key={c.id} active={cat === c.id} onClick={() => update({ cat: c.id })}>
             <c.icon size={14} /> {c.title}
@@ -33,7 +34,7 @@ export function CalculatorsPage() {
         ))}
       </div>
       {list.length === 0 ? (
-        <EmptyState icon={<Search size={28} />} title="Ничего не найдено" text="Попробуйте другой запрос или сбросьте фильтр." />
+        <EmptyState icon={<Search size={28} />} title={T('Ничего не найдено')} text={T('Попробуйте другой запрос или сбросьте фильтр.')} />
       ) : q || cat ? (
         <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{list.map((c) => <CalculatorCard key={c.id} calc={c} />)}</div>
       ) : (

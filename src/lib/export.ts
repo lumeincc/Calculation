@@ -3,6 +3,7 @@ import type { SheetData } from 'write-excel-file/browser'
 import { computeTotals, KIND_LABEL, lineTotal, type Estimate } from './estimate'
 import { fmtDate } from './format'
 import type { Company } from '@/store/settings'
+import { T, Tf } from '@/i18n'
 
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
@@ -33,14 +34,14 @@ export async function exportEstimateXlsx(e: Estimate, company: Company) {
   const t = computeTotals(e)
   const s = e.settings
   const data: SheetData = []
-  const title = e.docType === 'offer' ? 'Коммерческое предложение' : 'Сметный расчёт'
+  const title = e.docType === 'offer' ? T('Коммерческое предложение') : T('Сметный расчёт')
   data.push([{ value: `${title}: ${e.name}`, fontWeight: 'bold', fontSize: 14, columnSpan: 7 }])
-  if (company.name) data.push([{ value: `Исполнитель: ${company.name}${company.inn ? `, ИНН ${company.inn}` : ''}`, columnSpan: 7 }])
-  if (e.client) data.push([{ value: `Заказчик: ${e.client}`, columnSpan: 7 }])
-  if (e.object) data.push([{ value: `Объект: ${e.object}`, columnSpan: 7 }])
-  data.push([{ value: `Дата: ${fmtDate(Date.now())}`, columnSpan: 7 }])
+  if (company.name) data.push([{ value: Tf('Исполнитель: {0}{1}', [company.name, company.inn ? Tf(', ИНН {0}', [company.inn]) : '']), columnSpan: 7 }])
+  if (e.client) data.push([{ value: Tf('Заказчик: {0}', [e.client]), columnSpan: 7 }])
+  if (e.object) data.push([{ value: Tf('Объект: {0}', [e.object]), columnSpan: 7 }])
+  data.push([{ value: Tf('Дата: {0}', [fmtDate(Date.now())]), columnSpan: 7 }])
   data.push([])
-  data.push(['№', 'Наименование', 'Тип', 'Ед. изм.', 'Кол-во', 'Цена, ₸', 'Сумма, ₸'].map((v) => ({ value: v, ...head })))
+  data.push(['№', T('Наименование'), T('Тип'), T('Ед. изм.'), T('Кол-во'), T('Цена, ₸'), T('Сумма, ₸')].map((v) => ({ value: v, ...head })))
 
   const sumCells: string[] = []
   let n = 0
@@ -63,7 +64,7 @@ export async function exportEstimateXlsx(e: Estimate, company: Company) {
     const last = data.length
     const row = data.length + 1
     data.push([
-      { value: `Итого по разделу «${sec.name}»`, columnSpan: 6, fontWeight: 'bold', align: 'right' },
+      { value: Tf('Итого по разделу «{0}»', [sec.name]), columnSpan: 6, fontWeight: 'bold', align: 'right' },
       null, null, null, null, null,
       { value: sec.items.length ? `=SUM(G${first}:G${last})` : '=0', type: 'Formula', format: MONEY, fontWeight: 'bold' },
     ])
@@ -72,22 +73,22 @@ export async function exportEstimateXlsx(e: Estimate, company: Company) {
   data.push([])
   const total = (label: string, value: number, bold = false) =>
     data.push([{ value: label, columnSpan: 6, align: 'right', fontWeight: bold ? 'bold' : undefined }, null, null, null, null, null, { value, type: Number, format: MONEY, fontWeight: bold ? 'bold' : undefined }])
-  total('Прямые затраты', t.direct)
-  if (t.materialsMarkup) total(`Наценка на материалы ${s.materialsMarkupPct}%`, t.materialsMarkup)
-  if (t.overhead) total(`Накладные расходы ${s.overheadPct}%`, t.overhead)
-  if (t.profit) total(`Сметная прибыль ${s.profitPct}%`, t.profit)
-  if (t.contingency) total(`Непредвиденные затраты ${s.contingencyPct}%`, t.contingency)
-  if (t.discount) total(`Скидка ${s.discountPct}%`, -t.discount)
+  total(T('Прямые затраты'), t.direct)
+  if (t.materialsMarkup) total(Tf('Наценка на материалы {0}%', [s.materialsMarkupPct]), t.materialsMarkup)
+  if (t.overhead) total(Tf('Накладные расходы {0}%', [s.overheadPct]), t.overhead)
+  if (t.profit) total(Tf('Сметная прибыль {0}%', [s.profitPct]), t.profit)
+  if (t.contingency) total(Tf('Непредвиденные затраты {0}%', [s.contingencyPct]), t.contingency)
+  if (t.discount) total(Tf('Скидка {0}%', [s.discountPct]), -t.discount)
   if (s.vatMode === 'on_top') {
-    total('Итого без НДС', t.net)
-    total(`НДС ${s.vatPct}%`, t.vat)
+    total(T('Итого без НДС'), t.net)
+    total(Tf('НДС {0}%', [s.vatPct]), t.vat)
   }
-  total(s.vatMode === 'included' ? `Итого, в т.ч. НДС ${s.vatPct}%` : 'Итого к оплате', t.total, true)
-  if (s.vatMode === 'included') total(`в т.ч. НДС ${s.vatPct}%`, t.vat)
-  if (t.massKg > 0) data.push([{ value: `Общая масса позиций в т/кг: ${(t.massKg / 1000).toFixed(3)} т`, columnSpan: 7, fontStyle: 'italic' }])
+  total(s.vatMode === 'included' ? Tf('Итого, в т.ч. НДС {0}%', [s.vatPct]) : T('Итого к оплате'), t.total, true)
+  if (s.vatMode === 'included') total(Tf('в т.ч. НДС {0}%', [s.vatPct]), t.vat)
+  if (t.massKg > 0) data.push([{ value: Tf('Общая масса позиций в т/кг: {0} т', [(t.massKg / 1000).toFixed(3)]), columnSpan: 7, fontStyle: 'italic' }])
 
   const blob = await writeXlsxFile(data, {
-    sheet: 'Смета',
+    sheet: T('Смета'),
     columns: [{ width: 5 }, { width: 60 }, { width: 12 }, { width: 9 }, { width: 11 }, { width: 14 }, { width: 16 }],
     stickyRowsCount: 0,
   }).toBlob()
@@ -105,7 +106,7 @@ export function toCsv(rows: (string | number)[][]): Blob {
 }
 
 export function exportEstimateCsv(e: Estimate) {
-  const rows: (string | number)[][] = [['Раздел', 'Наименование', 'Тип', 'Ед.', 'Кол-во', 'Цена', 'Сумма']]
+  const rows: (string | number)[][] = [[T('Раздел'), T('Наименование'), T('Тип'), T('Ед.'), T('Кол-во'), T('Цена'), T('Сумма')]]
   for (const sec of e.sections) for (const it of sec.items) rows.push([sec.name, it.name, KIND_LABEL[it.kind].one, it.unit, it.qty, it.price, lineTotal(it)])
   downloadBlob(toCsv(rows), `${safeFileName(e.name)}.csv`)
 }
@@ -134,7 +135,7 @@ export function exportBackup() {
 
 export async function importBackup(file: File) {
   const data = JSON.parse(await file.text())
-  if (data?.app !== 'stroyraschet') throw new Error('Это не файл резервной копии TONNA')
+  if (data?.app !== 'stroyraschet') throw new Error(T('Это не файл резервной копии TONNA'))
   for (const k of BACKUP_KEYS) if (data[k]) localStorage.setItem(k, JSON.stringify(data[k]))
   location.reload()
 }

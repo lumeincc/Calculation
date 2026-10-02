@@ -3,6 +3,7 @@
  * The ~1.6 MB module is loaded only when such an archive is dropped.
  */
 import type { SevenZipModule } from '7z-wasm'
+import { T } from '@/i18n'
 
 export async function extractWith7z(data: Uint8Array, ext: string): Promise<{ name: string; data: Uint8Array }[]> {
   const [{ default: SevenZip }, { default: wasmUrl }] = await Promise.all([
@@ -40,8 +41,8 @@ export async function extractWith7z(data: Uint8Array, ext: string): Promise<{ na
   walk('/out', '')
   if (out.length === 0) {
     const err = log.find((l) => /wrong password|encrypted|пароль/i.test(l))
-      ? 'Архив защищён паролем'
-      : log.filter((l) => /error|cannot/i.test(l)).join('; ') || 'Не удалось распаковать архив'
+      ? T('Архив защищён паролем')
+      : log.filter((l) => /error|cannot/i.test(l)).join('; ') || T('Не удалось распаковать архив')
     throw new Error(err)
   }
   return out

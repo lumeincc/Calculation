@@ -4,22 +4,23 @@
  */
 import { uid } from './id'
 import { round } from './num'
+import { T, Tf } from '@/i18n'
 
 export type ItemKind = 'material' | 'work' | 'machine' | 'transport' | 'other'
 
 export const KINDS: ItemKind[] = ['material', 'work', 'machine', 'transport', 'other']
 
 export const KIND_LABEL: Record<ItemKind, { one: string; many: string; short: string }> = {
-  material: { one: 'Материал', many: 'Материалы', short: 'М' },
-  work: { one: 'Работа', many: 'Работы', short: 'Р' },
-  machine: { one: 'Механизм', many: 'Машины и механизмы', short: 'Мх' },
-  transport: { one: 'Доставка', many: 'Доставка', short: 'Д' },
-  other: { one: 'Прочее', many: 'Прочие затраты', short: 'П' },
+  material: { one: T('Материал'), many: T('Материалы'), short: T('М') },
+  work: { one: T('Работа'), many: T('Работы'), short: T('Р') },
+  machine: { one: T('Механизм'), many: T('Машины и механизмы'), short: T('Мх') },
+  transport: { one: T('Доставка'), many: T('Доставка'), short: T('Д') },
+  other: { one: T('Прочее'), many: T('Прочие затраты'), short: T('П') },
 }
 
 export const UNITS = [
-  'шт', 'м', 'п.м', 'м²', 'м³', 'т', 'кг', 'л', 'упак', 'мешок', 'рулон', 'лист',
-  'компл', 'ч', 'маш.-ч', 'рейс', 'смена', 'усл. ед.',
+  T('шт'), T('м'), T('п.м'), T('м²'), T('м³'), T('т'), T('кг'), T('л'), T('упак'), T('мешок'), T('рулон'), T('лист'),
+  T('компл'), T('ч'), T('маш.-ч'), T('рейс'), T('смена'), T('усл. ед.'),
 ]
 
 export interface EstimateItem {
@@ -81,16 +82,16 @@ export const DEFAULT_ESTIMATE_SETTINGS: EstimateSettings = {
   vatPct: 16,
 }
 
-export function createSection(name = 'Новый раздел', items: EstimateItem[] = []): EstimateSection {
+export function createSection(name = T('Новый раздел'), items: EstimateItem[] = []): EstimateSection {
   return { id: uid(), name, items }
 }
 
 export function createItem(patch: Partial<EstimateItem> = {}): EstimateItem {
-  return { id: uid(), kind: 'material', name: '', unit: 'шт', qty: 1, price: 0, ...patch }
+  return { id: uid(), kind: 'material', name: '', unit: T('шт'), qty: 1, price: 0, ...patch }
 }
 
 export function createEstimate(
-  name = 'Новая смета',
+  name = T('Новая смета'),
   settings: Partial<EstimateSettings> = {},
 ): Estimate {
   const now = Date.now()
@@ -103,7 +104,7 @@ export function createEstimate(
     docType: 'estimate',
     createdAt: now,
     updatedAt: now,
-    sections: [createSection('Раздел 1')],
+    sections: [createSection(T('Раздел 1'))],
     settings: { ...DEFAULT_ESTIMATE_SETTINGS, ...settings },
   }
 }
@@ -120,8 +121,9 @@ export function sectionTotal(section: EstimateSection): number {
 /** Mass of a line in kg when its unit is a mass unit, else 0. Used for the tonnage summary. */
 export function lineMassKg(item: Pick<EstimateItem, 'qty' | 'unit'>): number {
   const u = item.unit.trim().toLowerCase().replace(/\.$/, '')
-  if (u === 'т' || u === 'тн' || u === 'тонн' || u === 'тонна') return item.qty * 1000
-  if (u === 'кг') return item.qty
+  // Units may be in either interface language.
+  if (['т', 'тн', 'тонн', 'тонна', 't', 'ton', 'tons', 'tonne', 'tonnes'].includes(u)) return item.qty * 1000
+  if (u === 'кг' || u === 'kg') return item.qty
   return 0
 }
 
@@ -194,7 +196,7 @@ export function computeTotals(estimate: Pick<Estimate, 'sections' | 'settings'>)
 }
 
 /** Deep copy with fresh ids — for «Дублировать». */
-export function cloneEstimate(e: Estimate, name = `${e.name} (копия)`): Estimate {
+export function cloneEstimate(e: Estimate, name = Tf('{0} (копия)', [e.name])): Estimate {
   const now = Date.now()
   return {
     ...e,

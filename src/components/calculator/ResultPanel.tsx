@@ -11,6 +11,7 @@ import { fmt, money } from '@/lib/format'
 import { round } from '@/lib/num'
 import { linePrice, usePrices } from '@/store/prices'
 import { toast } from '@/store/toast'
+import { T } from '@/i18n'
 
 const kindTone = { material: 'zinc', work: 'blue', machine: 'amber', transport: 'green', other: 'zinc' } as const
 
@@ -54,12 +55,12 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
 
   const copy = async () => {
     const rows = [
-      ['Наименование', 'Ед.', 'Кол-во', 'Цена', 'Сумма'],
+      [T('Наименование'), T('Ед.'), T('Кол-во'), T('Цена'), T('Сумма')],
       ...active.map((p) => [p.line.name, p.line.unit, fmt(p.line.qty, 4), fmt(p.price, 2), fmt(p.total, 2)]),
-      ['Итого', '', '', '', fmt(total, 2)],
+      [T('Итого'), '', '', '', fmt(total, 2)],
     ]
     await navigator.clipboard.writeText(rows.map((r) => r.join('\t')).join('\n'))
-    toast('Таблица скопирована — её можно вставить в Excel')
+    toast(T('Таблица скопирована — её можно вставить в Excel'))
   }
 
   return (
@@ -106,8 +107,8 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
       {priced.length > 0 && (
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between gap-2 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-            <h3 className="text-sm font-semibold">Материалы и работы</h3>
-            <span className="text-xs text-zinc-500">цены — из справочника, можно изменить</span>
+            <h3 className="text-sm font-semibold">{T('Материалы и работы')}</h3>
+            <span className="text-xs text-zinc-500">{T('цены — из справочника, можно изменить')}</span>
           </div>
           <ul className="stagger divide-y divide-zinc-100 dark:divide-zinc-800">
             {priced.map((p) => (
@@ -116,7 +117,7 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
                   type="checkbox"
                   className="h-4 w-4 accent-brand-600"
                   checked={p.on}
-                  aria-label="Включить в расчёт"
+                  aria-label={T('Включить в расчёт')}
                   onChange={() =>
                     setExcluded((s) => {
                       const n = new Set(s)
@@ -136,7 +137,7 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <NumberInput size="sm" className="w-28" value={p.price} unit="₸" onChange={(v) => changePrice(p, v)} aria-label="Цена за единицу" />
+                  <NumberInput size="sm" className="w-28" value={p.price} unit="₸" onChange={(v) => changePrice(p, v)} aria-label={T('Цена за единицу')} />
                   <div className="w-28 text-right text-sm font-medium tabular-nums">{money(p.total)}</div>
                 </div>
               </li>
@@ -144,15 +145,15 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
           </ul>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
             <div>
-              <div className="text-xs text-zinc-500">Итого по расчёту</div>
+              <div className="text-xs text-zinc-500">{T('Итого по расчёту')}</div>
               <div className="text-xl font-semibold tabular-nums"><AnimatedNumber value={total} format={money} /></div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={copy}>
-                <ClipboardCopy size={15} /> Копировать
+                <ClipboardCopy size={15} />  {T('Копировать')}
               </Button>
               <Button size="sm" variant="primary" onClick={() => setDialog(true)} disabled={active.length === 0}>
-                <FilePlus2 size={15} /> В смету
+                <FilePlus2 size={15} />  {T('В смету')}
               </Button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { alignPage, itemsToLines, type PdfItem } from './pdfLayout'
 import type { DocTable } from './types'
+import { Tf } from '@/i18n'
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
 
@@ -47,7 +48,7 @@ export async function extractPdf(data: Uint8Array, maxPages = 300): Promise<{ te
       texts.push(lines.map((l) => l.map((c) => c.text).join('  ')).join('\n'))
       const aligned = alignPage(lines, carry)
       carry = aligned.carry
-      if (aligned.rows.length) tables.push({ title: `Стр. ${p}`, rows: aligned.rows })
+      if (aligned.rows.length) tables.push({ title: Tf('Стр. {0}', [p]), rows: aligned.rows })
       page.cleanup()
     }
     return { text: texts.join('\n\n'), pages: doc.numPages, tables }

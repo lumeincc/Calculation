@@ -12,6 +12,7 @@ import { useMetalCost } from '@/store/metalCost'
 import { usePrices } from '@/store/prices'
 import { useSettings } from '@/store/settings'
 import { toast } from '@/store/toast'
+import { T, Tf } from '@/i18n'
 
 interface SyncMeta {
   workspaceId: string | null
@@ -123,7 +124,7 @@ async function pushEstimates() {
       )
       meta.versions[id] = current.version
       meta.dirty.push(copy.id)
-      toast(`Смету «${e.name}» одновременно изменил ${current.updatedBy}. Ваша версия сохранена копией.`, { tone: 'info' })
+      toast(Tf('Смету «{0}» одновременно изменил {1}. Ваша версия сохранена копией.', [e.name, current.updatedBy]), { tone: 'info' })
     }
     meta.dirty = meta.dirty.filter((x) => x !== id)
     saveMeta()
@@ -137,7 +138,7 @@ async function pullEstimates() {
     applyLocal(() => useEstimates.setState({ estimates: merged.estimates }))
     meta.versions = merged.versions
     for (const c of merged.conflictCopies) meta.dirty.push(c.id)
-    if (merged.conflictCopies.length) toast('Коллеги изменили смету, которую вы правили. Ваша версия сохранена копией.', { tone: 'info' })
+    if (merged.conflictCopies.length) toast(T('Коллеги изменили смету, которую вы правили. Ваша версия сохранена копией.'), { tone: 'info' })
   }
   meta.since = r.now
   saveMeta()
@@ -191,7 +192,7 @@ export async function syncNow(): Promise<void> {
     if (e.status === 401) {
       await auth().logout()
       stopSync()
-      toast('Сессия истекла — войдите снова', { tone: 'error', action: { label: 'Войти', to: '/account' } })
+      toast(T('Сессия истекла — войдите снова'), { tone: 'error', action: { label: T('Войти'), to: '/account' } })
     }
     useSyncStatus.setState({ status: e.status === 0 ? 'offline' : 'error', error: e.message })
   } finally {

@@ -1,6 +1,7 @@
 /** Pure merge logic of the estimate sync (kept separate from I/O so it can be tested). */
 import { cloneEstimate, type Estimate } from './estimate'
 import type { ApiRecord } from './api'
+import { Tf } from '@/i18n'
 
 /** Ids of estimates that were created/changed or removed between two store snapshots. */
 export function diffEstimates(prev: Estimate[], next: Estimate[]): { changed: string[]; removed: string[] } {
@@ -19,7 +20,7 @@ export interface MergeResult {
 }
 
 export function conflictCopy(local: Estimate): Estimate {
-  return cloneEstimate(local, `${local.name} (конфликт — ваша версия)`)
+  return cloneEstimate(local, Tf('{0} (конфликт — ваша версия)', [local.name]))
 }
 
 /**

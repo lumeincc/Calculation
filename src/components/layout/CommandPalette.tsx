@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { searchCalculators } from '@/calculators/registry'
 import { useEstimates } from '@/store/estimates'
+import { T } from '@/i18n'
 
 interface Item {
   id: string
@@ -13,10 +14,10 @@ interface Item {
 }
 
 const PAGES: Item[] = [
-  { id: 'p-docs', title: 'Документы', subtitle: 'Загрузить файлы и архивы', icon: <FolderOpen size={18} />, to: '/docs' },
-  { id: 'p-est', title: 'Сметы', subtitle: 'Список смет', icon: <FileSpreadsheet size={18} />, to: '/estimates' },
-  { id: 'p-prices', title: 'Справочник цен', icon: <Tags size={18} />, to: '/prices' },
-  { id: 'p-settings', title: 'Настройки', icon: <Settings size={18} />, to: '/settings' },
+  { id: 'p-docs', title: T('Документы'), subtitle: T('Загрузить файлы и архивы'), icon: <FolderOpen size={18} />, to: '/docs' },
+  { id: 'p-est', title: T('Сметы'), subtitle: T('Список смет'), icon: <FileSpreadsheet size={18} />, to: '/estimates' },
+  { id: 'p-prices', title: T('Справочник цен'), icon: <Tags size={18} />, to: '/prices' },
+  { id: 'p-settings', title: T('Настройки'), icon: <Settings size={18} />, to: '/settings' },
 ]
 
 export function CommandPalette({ open, onClose }: { open: boolean; onClose(): void }) {
@@ -45,7 +46,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose(): vo
     const est = estimates
       .filter((e) => ql && e.name.toLowerCase().includes(ql))
       .slice(0, 5)
-      .map((e) => ({ id: e.id, title: e.name, subtitle: 'Смета', icon: <FileSpreadsheet size={18} />, to: `/estimates/${e.id}` }))
+      .map((e) => ({ id: e.id, title: e.name, subtitle: T('Смета'), icon: <FileSpreadsheet size={18} />, to: `/estimates/${e.id}` }))
     const pages = PAGES.filter((p) => !ql || p.title.toLowerCase().includes(ql))
     return [...calcs, ...est, ...pages].slice(0, 30)
   }, [q, estimates])
@@ -79,12 +80,12 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose(): vo
             else return
             e.preventDefault()
           }}
-          placeholder="Калькулятор, смета, раздел… например «швеллер» или «щебень»"
+          placeholder={T('Калькулятор, смета, раздел… например «швеллер» или «щебень»')}
           className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-zinc-400"
         />
       </div>
       <ul className="max-h-[50vh] overflow-y-auto p-2">
-        {items.length === 0 && <li className="px-3 py-6 text-center text-sm text-zinc-500">Ничего не найдено</li>}
+        {items.length === 0 && <li className="px-3 py-6 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</li>}
         {items.map((it, i) => (
           <li key={it.id}>
             <button
