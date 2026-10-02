@@ -269,3 +269,23 @@ describe('assembly drawing specification', () => {
     expect(extractDrawingSpec([{ title: 'p', rows: [['План', 'Труба 57х3,5']] }], 'f')).toBeNull()
   })
 })
+
+describe('net and rough weight', () => {
+  it('reads «Вес чистовой» as mass and «Вес черновой» as rough mass', () => {
+    const rows: (string | number)[][] = [
+      ['Материал', 'Профиль', 'Вес чистовой, кг', 'Вес черновой, кг'],
+      ['C255', -4, 163.73, 164.38],
+      ['C255', 'L.80x6~ГОСТ_8509-93', 368.46, 368.46],
+    ]
+    const { metal } = extractFromTable({ title: 'Выборка', rows }, 'f')
+    expect(metal.map((h) => [h.massKg, h.massGrossKg])).toEqual([[163.73, 164.38], [368.46, 368.46]])
+  })
+  it('treats «+5%» columns as rough mass', () => {
+    const rows: (string | number)[][] = [
+      ['Наименование', 'Количество', 'Вес всех, кг', 'Вес всех, кг +5%'],
+      ['Анкер M16 х 200', 56, 16.63, 17.82],
+    ]
+    const { positions } = extractFromTable({ title: 'Метизы', rows }, 'f')
+    expect([positions[0].massKg, positions[0].massGrossKg]).toEqual([16.63, 17.82])
+  })
+})

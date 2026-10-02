@@ -37,6 +37,8 @@ export interface Position {
   sum: number
   /** Total mass of the line when known (mass column or computed from a profile). */
   massKg?: number
+  /** Rough (черновой) mass incl. cutting waste, when the document gives it. */
+  massGrossKg?: number
   /** Price-catalog key (₸/т) when the row is a recognised metal profile with known mass. */
   metalPriceKey?: string
   kind: ItemKind
@@ -56,6 +58,7 @@ export interface MetalHit {
   unit: string
   /** null when the row lacks the data needed to get mass. */
   massKg: number | null
+  massGrossKg?: number
   massFrom: 'column' | 'unit' | 'length' | 'none'
 }
 

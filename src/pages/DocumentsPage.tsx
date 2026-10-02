@@ -8,6 +8,7 @@ import { Dropzone } from '@/components/docs/Dropzone'
 import { DocViewer, TableView } from '@/components/docs/Viewers'
 import { AddToEstimateDialog } from '@/components/estimate/AddToEstimateDialog'
 import { Button, IconButton } from '@/components/ui/Button'
+import { Segmented } from '@/components/ui/Field'
 import { Badge, EmptyState, PageHeader, Stat, Tabs } from '@/components/ui/misc'
 import { KIND_LABEL as DOC_KIND } from '@/docs/detect'
 import { extraMetal, metalSources, type MetalSource } from '@/docs/metalSources'
@@ -121,7 +122,16 @@ export function DocumentsPage() {
   const docs = files.filter((f) => f.kind !== 'archive')
   const byId = useMemo(() => new Map(files.map((f) => [f.id, f])), [files])
   const positions = useMemo(() => docs.flatMap((f) => analyses[f.id]?.positions ?? []), [docs, analyses])
-  const allMetal = useMemo(() => docs.flatMap((f) => analyses[f.id]?.metal ?? []), [docs, analyses])
+  // «Черновой» weight includes cutting waste; documents without it fall back to the net weight.
+  const [weight, setWeight] = useState<'net' | 'gross'>('net')
+  const allMetal = useMemo(
+    () =>
+      docs
+        .flatMap((f) => analyses[f.id]?.metal ?? [])
+        .map((h) => (weight === 'gross' && h.massGrossKg !== undefined ? { ...h, massKg: h.massGrossKg } : h)),
+    [docs, analyses, weight],
+  )
+  const hasGross = useMemo(() => docs.some((f) => analyses[f.id]?.metal.some((h) => h.massGrossKg !== undefined) || analyses[f.id]?.positions.some((p) => p.massGrossKg !== undefined)), [docs, analyses])
   const sourceInfo = useMemo(() => metalSources(docs, allMetal), [docs, allMetal])
   const [sourceSel, setSourceSel] = useState<Set<string> | null>(null)
   const activeSources = sourceSel ?? sourceInfo.selected
@@ -129,7 +139,10 @@ export function DocumentsPage() {
   const metal = useMemo(() => allMetal.filter((h) => activeSources.has(h.fileId)), [allMetal, activeSources])
   const metalGroups = useMemo(() => groupMetal(metal), [metal])
   const profileKg = metalGroups.reduce((s, g) => s + g.massKg, 0)
-  const extras = useMemo(() => extraMetal(docs, positions), [docs, positions])
+  const extras = useMemo(
+    () => extraMetal(docs, weight === 'gross' ? positions.map((p) => (p.massGrossKg !== undefined ? { ...p, massKg: p.massGrossKg } : p)) : positions),
+    [docs, positions, weight],
+  )
   const [extraSel, setExtraSel] = useState<Set<string> | null>(null)
   const activeExtras = extraSel ?? new Set(extras.map((x) => x.fileId))
   const extraKg = extras.filter((x) => activeExtras.has(x.fileId)).reduce((s, x) => s + x.kg, 0)
@@ -426,6 +439,17 @@ export function DocumentsPage() {
             <EmptyState icon={<Weight size={28} />} title="Металлопрокат не найден" text="Загрузите спецификацию металла (КМ, КЖ) в Excel, PDF или Word — профили и масса будут собраны здесь." />
           ) : (
             <div className="space-y-4">
+              {hasGross && (
+                <div className="card flex flex-wrap items-center gap-3 p-4">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold">Вес металла</h3>
+                    <p className="text-xs text-zinc-500">Черновой — с учётом отходов на раскрой (для закупки). Где черновой вес не указан, берётся чистовой.</p>
+                  </div>
+                  <div className="w-72">
+                    <Segmented value={weight} onChange={(v) => setWeight(v as 'net' | 'gross')} options={[{ value: 'net', label: 'Чистовой' }, { value: 'gross', label: 'Черновой' }]} />
+                  </div>
+                </div>
+              )}
               <div className="card p-4">
                 <h3 className="text-sm font-semibold">Какие документы считать</h3>
                 <p className="mt-0.5 mb-3 text-xs text-zinc-500">Один и тот же металл обычно есть в нескольких документах (выборка, реестр, техкарта, чертежи). Документы с одинаковым итогом — дубли; если есть итоговая выборка, считается только она, а остальные служат для сверки.</p>
@@ -498,7 +522,7 @@ export function DocumentsPage() {
                 </div>
               )}
               <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <Stat label="Общий тоннаж" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={extraKg ? `прокат ${fmt(profileKg / 1000, 3)} т + прочее ${fmt(extraKg / 1000, 3)} т` : undefined} />
+                <Stat label={weight === 'gross' ? 'Общий тоннаж (черновой)' : 'Общий тоннаж (чистовой)'} value={fmt(metalKg / 1000, 3)} unit="т" accent hint={extraKg ? `прокат ${fmt(profileKg / 1000, 3)} т + прочее ${fmt(extraKg / 1000, 3)} т` : undefined} />
                 <Stat label="Профилей" value={metalGroups.length} />
                 <Stat label="Строк спецификаций" value={metal.length} hint={unknownMass ? `без массы: ${unknownMass}` : undefined} />
                 <Stat label="Стоимость по справочнику" value={money(metalGroups.reduce((s, g) => s + (g.massKg / 1000) * priceOf(g.priceKey, overrides, custom), 0))} />

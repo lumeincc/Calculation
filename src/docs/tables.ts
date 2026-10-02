@@ -37,11 +37,14 @@ export interface ColumnMap {
   unitMass?: number
   unitMassT?: boolean
   length?: number
+  /** Rough mass («Вес черновой», «+5%»). */
+  grossMass?: number
+  grossMassT?: boolean
   /** Column with the steel section («Профиль», «Сечение»). */
   profile?: number
 }
 
-type Role = Exclude<keyof ColumnMap, 'massUnitT' | 'unitMassT'> | 'material'
+type Role = Exclude<keyof ColumnMap, 'massUnitT' | 'unitMassT' | 'grossMassT'> | 'material'
 
 const ROLE_TESTS: [Role, RegExp, RegExp?][] = [
   ['unit', /(^|\s)ед\.?(\s|$)|ед\.\s*изм|единиц|изм\./],
@@ -75,6 +78,10 @@ function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
       const isUnit = /(ед|1\s*(шт|м|п\.?\s*м)|одного|одной|одна|един)/.test(t) && !/(общ|всего|всех|итого)/.test(t)
       const isT = /(,|\s|\()\s*т\.?(\s|\)|$)|тонн/.test(t)
       const isTotal = /(общ|всего|всех|итого)/.test(t)
+      if (/чернов|брутто|с\s*отход|\+\s*\d+\s*%/.test(t)) {
+        if (map.grossMass === undefined && !isUnit) Object.assign(map, { grossMass: c, grossMassT: isT })
+        continue
+      }
       if (isUnit) {
         if (map.unitMass === undefined) Object.assign(map, { unitMass: c, unitMassT: isT })
       } else if (map.mass === undefined) {
@@ -99,6 +106,8 @@ function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
   }
   // Metal schedules often have no «Наименование»: the section or material column names the row.
   map.name ??= map.profile ?? material
+  // Only a rough-mass column: use it as the mass.
+  if (map.mass === undefined && map.grossMass !== undefined) Object.assign(map, { mass: map.grossMass, massUnitT: map.grossMassT })
   if (map.name === undefined || (map.qty === undefined && map.sum === undefined && map.mass === undefined)) return null
   return map as ColumnMap
 }
@@ -183,6 +192,7 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
     let massKg = map.mass !== undefined ? massToKg(parseNum(row[map.mass]), map.massUnitT) : undefined
     const unitMassKg = map.unitMass !== undefined ? massToKg(parseNum(row[map.unitMass]), map.unitMassT) : undefined
     if (massKg === undefined && unitMassKg !== undefined && qty !== null) massKg = unitMassKg * qty
+    const massGrossKg = map.grossMass !== undefined ? massToKg(parseNum(row[map.grossMass]), map.grossMassT) : undefined
     if (qty === null && sum === null && massKg === undefined) continue
 
     const pos: Position = {
@@ -196,6 +206,7 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
       price: price ?? 0,
       sum: sum ?? (qty ?? 0) * (price ?? 0),
       massKg,
+      massGrossKg,
       kind: guessKind(name, unit),
     }
     if (qty === null && massKg !== undefined && !unit) pos.unit = 'т'
@@ -222,7 +233,7 @@ export function extractFromTable(table: DocTable, fileId: string): TableExtract 
       if (m !== null && (!Number.isFinite(m) || m > 500_000)) [m, from] = [null, 'none']
       metal.push({
         id: uid(), fileId, source: table.title, raw: name, profile, name: profileName(profile),
-        kgPerM: k, qty: q, unit, massKg: m, massFrom: from,
+        kgPerM: k, qty: q, unit, massKg: m, massFrom: from, massGrossKg: m !== null ? massGrossKg : undefined,
       })
       if (m !== null) {
         if (pos.massKg === undefined) pos.massKg = m
