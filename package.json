@@ -1,9 +1,9 @@
 {
-  "name": "stroyraschet",
+  "name": "tonna",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "СтройРасчёт — строительные калькуляторы, тоннаж металла и сметы в браузере",
+  "description": "TONNA — строительные калькуляторы, тоннаж металла и сметы в браузере",
   "scripts": {
     "predev": "node scripts/copy-assets.mjs",
     "dev": "vite",

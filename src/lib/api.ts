@@ -1,4 +1,4 @@
-/** Minimal client for the СтройРасчёт server API. */
+/** Minimal client for the TONNA server API. */
 export class ApiError extends Error {
   status: number
   body: Record<string, unknown>

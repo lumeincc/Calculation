@@ -129,12 +129,12 @@ export function exportBackup() {
     const v = localStorage.getItem(k)
     if (v) data[k] = JSON.parse(v)
   }
-  downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `stroyraschet-backup-${new Date().toISOString().slice(0, 10)}.json`)
+  downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `tonna-backup-${new Date().toISOString().slice(0, 10)}.json`)
 }
 
 export async function importBackup(file: File) {
   const data = JSON.parse(await file.text())
-  if (data?.app !== 'stroyraschet') throw new Error('Это не файл резервной копии СтройРасчёта')
+  if (data?.app !== 'stroyraschet') throw new Error('Это не файл резервной копии TONNA')
   for (const k of BACKUP_KEYS) if (data[k]) localStorage.setItem(k, JSON.stringify(data[k]))
   location.reload()
 }

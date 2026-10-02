@@ -7,6 +7,7 @@ import { useAuth } from '@/store/auth'
 import { useDocs } from '@/store/docs'
 import { useEstimates } from '@/store/estimates'
 import { useSettings, type Theme } from '@/store/settings'
+import { TonnaLogo } from './TonnaLogo'
 
 const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: '/', label: 'Главная', icon: Home, end: true },
@@ -86,6 +87,9 @@ export function Dock({ onSearch }: { onSearch(): void }) {
       className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-center lg:flex"
     >
       <nav className="mx-auto flex w-[64px] flex-col items-center gap-2 rounded-[22px] border border-zinc-200/70 bg-white/60 py-3 shadow-xl shadow-zinc-900/5 backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-900/60 dark:shadow-black/40">
+        <NavLink to="/" aria-label="TONNA — на главную" className="mb-1 flex h-12 items-center justify-center text-zinc-900 dark:text-white">
+          <TonnaLogo className="h-11 w-auto" />
+        </NavLink>
         <Tile label="Поиск (Ctrl K)" icon={Search} onClick={onSearch} />
         <span className="my-0.5 h-px w-8 bg-zinc-200 dark:bg-zinc-700" />
         {NAV.map((n) => (

@@ -2,12 +2,13 @@ import {
   Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Menu, Monitor, Moon, Search, Settings, Sun, Tags, Weight, X,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { applyTheme, useSettings, type Theme } from '@/store/settings'
 import { useEstimates } from '@/store/estimates'
 import { useDocs } from '@/store/docs'
 import { CommandPalette } from './CommandPalette'
 import { Dock } from './Dock'
+import { TonnaLogo } from './TonnaLogo'
 import { Toasts } from './Toasts'
 
 const NAV_FULL = [
@@ -116,6 +117,9 @@ export function Layout() {
         <button onClick={() => setMenu(true)} aria-label="Меню" className="-ml-1 rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Menu size={20} />
         </button>
+        <Link to="/" aria-label="TONNA — на главную" className="flex items-center gap-2 text-zinc-900 dark:text-white">
+          <TonnaLogo className="h-8 w-auto" />
+        </Link>
         <button onClick={() => setPalette(true)} aria-label="Поиск" className="ml-auto rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Search size={19} />
         </button>
@@ -125,7 +129,8 @@ export function Layout() {
         <div className="no-print fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-zinc-950/40" onClick={() => setMenu(false)} />
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white px-3 py-4 shadow-xl dark:bg-zinc-950">
-            <div className="mb-5 flex items-center justify-end px-2">
+            <div className="mb-5 flex items-center justify-between px-2">
+              <TonnaLogo className="h-9 w-auto text-zinc-900 dark:text-white" />
               <button onClick={() => setMenu(false)} aria-label="Закрыть меню" className="rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                 <X size={18} />
               </button>
