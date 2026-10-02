@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { CALCULATORS, CATEGORIES, getCalculator } from '@/calculators/registry'
 import type { Values } from '@/calculators/types'
 import { CalculatorForm } from '@/components/calculator/CalculatorForm'
+import { MobileResultBar } from '@/components/calculator/MobileResultBar'
 import { ResultPanel } from '@/components/calculator/ResultPanel'
 import { Button } from '@/components/ui/Button'
 import { PageHeader } from '@/components/ui/misc'
@@ -100,11 +101,12 @@ function CalculatorView({ id }: { id: string }) {
             </div>
           )}
         </div>
-        <div className="lg:sticky lg:top-6">
+        <div id="calc-result" className="scroll-mt-20 lg:sticky lg:top-6">
           <ResultPanel result={result} sectionName={def.sectionName ?? def.title} source={def.id} />
         </div>
       </div>
 
+      <MobileResultBar result={result} targetId="calc-result" />
       {Extra && <Extra values={values} result={result} />}
 
       {related.length > 0 && (

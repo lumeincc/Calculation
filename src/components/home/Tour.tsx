@@ -14,6 +14,7 @@ interface Step {
 
 const STEPS: Step[] = [
   { title: T('Добро пожаловать в TONNA'), text: T('Калькуляторы, тоннаж металла, сметы и документы компании — в одном месте. Покажем главное за полминуты.') },
+  { target: 'quick', title: T('Кнопка «+» — всё под рукой'), text: T('Новая смета, загрузка проекта, тоннаж металла, договор, счёт или акт — в одно касание из любого места.') },
   { target: '/calc', title: T('Калькуляторы'), text: T('19 расчётов: металл, бетон, арматура, кладка, кровля, отделка, земляные работы. Результат одной кнопкой уходит в смету.') },
   { target: '/docs', title: T('Документы проекта'), text: T('Перетащите PDF, Excel, Word или целый архив ZIP/RAR — сайт найдёт сметы, спецификации и посчитает тоннаж.') },
   { target: '/estimates', title: T('Сметы'), text: T('Наценки, накладные, НДС, скидки. Выгрузка в Excel с формулами и печать в PDF.') },
@@ -72,13 +73,17 @@ export function Tour({ onClose }: { onClose(): void }) {
   }, [close, i, last])
 
   const cardW = 340
-  const cardStyle = rect
-    ? {
-        left: Math.min(rect.left + rect.width + 18, window.innerWidth - cardW - 16),
-        top: Math.max(16, Math.min(rect.top + rect.height / 2 - 90, window.innerHeight - 260)),
-        width: cardW,
-      }
-    : undefined
+  const narrow = window.innerWidth < 640
+  const cardStyle = !rect
+    ? undefined
+    : narrow
+      ? // Phones: the card sits above the highlighted tab of the bottom bar.
+        { left: 16, width: window.innerWidth - 32, bottom: Math.max(16, window.innerHeight - rect.top + 14) }
+      : {
+          left: Math.min(rect.left + rect.width + 18, window.innerWidth - cardW - 16),
+          top: Math.max(16, Math.min(rect.top + rect.height / 2 - 90, window.innerHeight - 260)),
+          width: cardW,
+        }
 
   // Portal: the page wrapper is animated with transforms, which would offset position: fixed.
   return createPortal(

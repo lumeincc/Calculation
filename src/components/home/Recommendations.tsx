@@ -104,7 +104,7 @@ export function Recommendations() {
           <RefreshCw size={14} className="transition duration-500 group-hover:rotate-180" /> {T('Ещё советы')}
         </button>
       </div>
-      <div key={offset} className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div key={offset} className="stagger no-scrollbar -mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4 [&>*]:w-64 [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-auto">
         {shown.map((t, i) => <Card key={t.id} tip={t} index={i} />)}
       </div>
     </section>

@@ -341,14 +341,14 @@ export function FilesPage() {
             <input ref={filesInput} type="file" multiple hidden onChange={async (e) => { if (e.target.files) upload(await readPicked(e.target.files)); e.target.value = '' }} />
             <input ref={folderInput} type="file" multiple hidden {...{ webkitdirectory: '' }} onChange={async (e) => { if (e.target.files) upload(await readPicked(e.target.files)); e.target.value = '' }} />
             <Button onClick={() => setNewFolder('')}><FolderPlus size={16} /> {T('Новая папка')}</Button>
-            <Button onClick={() => folderInput.current?.click()}><FolderUp size={16} /> {T('Загрузить папку')}</Button>
+            <Button className="max-sm:hidden" onClick={() => folderInput.current?.click()}><FolderUp size={16} /> {T('Загрузить папку')}</Button>
             <Button variant="primary" onClick={() => filesInput.current?.click()}><Upload size={16} /> {T('Загрузить файлы')}</Button>
           </>
         }
       />
 
       <div className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="space-y-4">
+        <aside className="hidden space-y-4 lg:block">
           <div className="card p-2">
             {navItem('/office/files', !folderId && !view, <Archive size={15} />, T('Все папки'), files.length)}
             {navItem('/office/files?view=recent', view === 'recent', <Clock size={15} />, T('Недавние'))}
@@ -393,6 +393,20 @@ export function FilesPage() {
           onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setDropOver(false)}
           onDrop={onDrop}
         >
+          {/* Phones: sidebar becomes a swipeable row. */}
+          <div className="no-scrollbar -mx-4 mb-3 flex gap-2 overflow-x-auto px-4 lg:hidden [&>*]:shrink-0">
+            {[
+              { to: '/office/files', label: T('Все папки'), active: !folderId && !view, icon: <Archive size={14} /> },
+              { to: '/office/files?view=recent', label: T('Недавние'), active: view === 'recent', icon: <Clock size={14} /> },
+              { to: '/office/files?view=starred', label: T('Избранное'), active: view === 'starred', icon: <Star size={14} /> },
+              ...folders.filter((f) => !f.parentId).sort((a, b) => a.name.localeCompare(b.name)).map((f) => ({ to: `/office/files?folder=${f.id}`, label: f.name, active: crumbs[0]?.id === f.id, icon: <FolderIcon size={14} /> })),
+            ].map((c) => (
+              <Link key={c.to} to={c.to} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm ${c.active ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900' : 'border-zinc-300 text-zinc-700 dark:border-zinc-700 dark:text-zinc-300'}`}>
+                {c.icon}
+                {c.label}
+              </Link>
+            ))}
+          </div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-sm">
               <Link to="/office/files" className="font-medium hover:underline">{view === 'starred' ? T('Избранное') : view === 'recent' ? T('Недавние') : T('Архив')}</Link>

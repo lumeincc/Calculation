@@ -62,7 +62,7 @@ export function PapersPage() {
   const kind = (params.get('kind') ?? '') as PaperKind | ''
   const [status, setStatus] = useState('')
   const [q, setQ] = useState('')
-  const [creating, setCreating] = useState(false)
+  const [creating, setCreating] = useState(params.get('new') === '1')
   const cpName = useMemo(() => new Map(cps.map((c) => [c.id, c.name])), [cps])
   const contractNo = useMemo(() => new Map(contracts.map((c) => [c.id, c.number])), [contracts])
 
@@ -112,7 +112,22 @@ export function PapersPage() {
       ) : list.length === 0 ? (
         <p className="py-10 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</p>
       ) : (
-        <div className="card overflow-x-auto">
+        <>
+        <div className="space-y-2 sm:hidden">
+          {list.map((p) => (
+            <Link key={p.id} to={`/office/papers/${p.id}`} className="card flex items-center gap-3 p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold">{PAPER_KIND[p.kind].short} № {p.number} <span className="font-normal text-zinc-500">· {dateShort(p.date)}</span></div>
+                <div className="truncate text-sm text-zinc-600 dark:text-zinc-400">{cpName.get(p.counterpartyId ?? '') || '—'}</div>
+              </div>
+              <div className="text-right">
+                {p.lines.length > 0 && <div className="text-sm font-semibold tabular-nums">{money(paperTotals(p).total)}</div>}
+                <PaperStatusBadge status={p.status} />
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="card hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500 dark:border-zinc-800">
@@ -145,6 +160,7 @@ export function PapersPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
       {creating && <NewPaperDialog open onClose={() => setCreating(false)} kind={kind || 'invoice'} />}
     </div>

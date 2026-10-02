@@ -25,7 +25,7 @@ export function CalculatorsPage() {
         <Search size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
         <input className="input h-11 pl-10" placeholder={T('Что посчитать? Например: швеллер, газобетон, щебень')} value={q} onChange={(e) => update({ q: e.target.value })} autoFocus />
       </div>
-      <div className="stagger mb-6 flex flex-wrap gap-2">
+      <div className="no-scrollbar stagger -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&>*]:shrink-0">
         <Chip active={!cat} onClick={() => update({ cat: '' })}>{T('Все')}</Chip>
         {CATEGORIES.map((c) => (
           <Chip key={c.id} active={cat === c.id} onClick={() => update({ cat: c.id })}>

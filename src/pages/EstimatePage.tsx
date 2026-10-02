@@ -75,6 +75,44 @@ function ItemRow({ e, sec, it, index }: { e: Estimate; sec: EstimateSection; it:
   )
 }
 
+/** Phone layout of one estimate line: stacked fields instead of a wide table row. */
+function ItemCard({ e, sec, it, index }: { e: Estimate; sec: EstimateSection; it: EstimateItem; index: number }) {
+  const patchItem = useEstimates((s) => s.patchItem)
+  const removeItem = useEstimates((s) => s.removeItem)
+  const duplicateItem = useEstimates((s) => s.duplicateItem)
+  const moveItem = useEstimates((s) => s.moveItem)
+  const p = (patch: Partial<EstimateItem>) => patchItem(e.id, sec.id, it.id, patch)
+  return (
+    <div className="space-y-2 px-3 py-3">
+      <div className="flex items-start gap-2">
+        <span className="pt-2 text-xs text-zinc-400 tabular-nums">{index}</span>
+        <textarea
+          rows={1}
+          value={it.name}
+          placeholder={T('Наименование')}
+          onChange={(ev) => p({ name: ev.target.value })}
+          className="input field-sizing-content h-auto min-h-10 flex-1 resize-none py-2 leading-snug"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <select value={it.kind} onChange={(ev) => p({ kind: ev.target.value as ItemKind })} className="input cursor-pointer text-sm" aria-label={T('Тип')}>
+          {KINDS.map((k) => <option key={k} value={k}>{KIND_LABEL[k].one}</option>)}
+        </select>
+        <input list="units" value={it.unit} onChange={(ev) => p({ unit: ev.target.value })} className="input" aria-label={T('Единица')} placeholder={T('Ед.')} />
+        <NumberInput value={it.qty} unit={it.unit} onChange={(v) => p({ qty: v })} aria-label={T('Количество')} />
+        <NumberInput value={it.price} unit="₸" onChange={(v) => p({ price: v })} aria-label={T('Цена')} />
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="flex-1 text-base font-semibold tabular-nums">{money(lineTotal(it))}</span>
+        <IconButton label={T('Выше')} onClick={() => moveItem(e.id, sec.id, it.id, -1)}><ArrowUp size={16} /></IconButton>
+        <IconButton label={T('Ниже')} onClick={() => moveItem(e.id, sec.id, it.id, 1)}><ArrowDown size={16} /></IconButton>
+        <IconButton label={T('Дублировать')} onClick={() => duplicateItem(e.id, sec.id, it.id)}><Copy size={16} /></IconButton>
+        <IconButton label={T('Удалить')} onClick={() => removeItem(e.id, sec.id, it.id)}><Trash2 size={16} /></IconButton>
+      </div>
+    </div>
+  )
+}
+
 function MenuItem({ icon, children, onClick, danger }: { icon: React.ReactNode; children: React.ReactNode; onClick(): void; danger?: boolean }) {
   return (
     <button onClick={onClick} className={`flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 ${danger ? 'text-red-600 dark:text-red-400' : ''}`}>
@@ -109,7 +147,12 @@ function SectionBlock({ e, sec, start, first, last }: { e: Estimate; sec: Estima
         </div>
       </div>
       {sec.items.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-zinc-100 md:hidden dark:divide-zinc-800">
+          {sec.items.map((it, i) => <ItemCard key={it.id} e={e} sec={sec} it={it} index={start + i} />)}
+        </div>
+      )}
+      {sec.items.length > 0 && (
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[720px] table-fixed">
             <thead>
               <tr className="text-left text-[11px] font-medium tracking-wide text-zinc-500 uppercase">

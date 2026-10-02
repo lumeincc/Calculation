@@ -81,7 +81,32 @@ export function ContractsPage() {
       ) : list.length === 0 ? (
         <p className="py-10 text-center text-sm text-zinc-500">{T('Ничего не найдено')}</p>
       ) : (
-        <div className="card overflow-x-auto">
+        <>
+        <div className="space-y-2 sm:hidden">
+          {list.map((c) => {
+            const pr = contractProgress(c, papers)
+            const pct = pr.total > 0 ? Math.min(100, (pr.paid / pr.total) * 100) : 0
+            return (
+              <Link key={c.id} to={`/office/contracts/${c.id}`} className="card block p-4 active:bg-zinc-50 dark:active:bg-zinc-800/40">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold">№ {c.number || '—'} <span className="font-normal text-zinc-500">· {dateShort(c.date)}</span></div>
+                    <div className="truncate text-sm">{cpName.get(c.counterpartyId ?? '') || T('Контрагент не выбран')}</div>
+                  </div>
+                  <ContractStatusBadge status={c.status} />
+                </div>
+                {c.title && <div className="mt-1 truncate text-xs text-zinc-500">{c.title}</div>}
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                    <div className="h-full rounded-full bg-zinc-900 dark:bg-white" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-sm font-semibold tabular-nums">{money(pr.total)}</span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+        <div className="card hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500 dark:border-zinc-800">
@@ -130,6 +155,7 @@ export function ContractsPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
       <NewContractDialog open={creating} onClose={() => setCreating(false)} />
     </div>

@@ -32,13 +32,14 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_85%_40%,rgb(63_63_70/0.55),transparent_60%)]" />
       <div className="animate-glow pointer-events-none absolute -right-16 -bottom-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
-      <div className="relative grid items-center gap-6 px-6 py-8 sm:px-10 sm:py-10 md:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="relative grid items-center gap-6 px-5 py-6 sm:px-10 sm:py-10 md:grid-cols-[minmax(0,1fr)_auto]">
         <div className="stagger max-w-2xl">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{T('Расчёты материалов, тоннаж и сметы — в одном месте')}</h1>
-          <p className="mt-3 text-base text-zinc-400 sm:text-lg">
+          <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-4xl">{T('Расчёты материалов, тоннаж и сметы — в одном месте')}</h1>
+          <p className="mt-3 hidden text-base text-zinc-400 sm:block sm:text-lg">
             {CALCULATORS.length} {T('строительных калькуляторов, спецификация металла по ГОСТ, сметы с НДС, накладными и выгрузкой в Excel. Загрузите архив с проектной документацией — сайт распакует его и найдёт сметы и спецификации.')}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3" data-tour="hero-actions">
+          <p className="mt-2 text-sm text-zinc-400 sm:hidden">{T('Калькуляторы, тоннаж по ГОСТ, сметы и документы — всё в телефоне.')}</p>
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:gap-3 [&>*]:max-sm:px-2 [&>*]:max-sm:text-[13px] [&>*:first-child]:col-span-2">
             <ButtonLink to="/docs" variant="primary" className="!bg-white !text-zinc-900 shadow-[0_0_24px_rgb(255_255_255/0.18)] hover:!bg-zinc-200"><FolderOpen size={17} /> {T('Загрузить документы')}</ButtonLink>
             <Button className="!border-white/15 !bg-white/5 !text-white hover:!bg-white/10" onClick={() => navigate(`/estimates/${create(T('Новая смета'), defaults)}`)}>
               <Plus size={17} /> {T('Новая смета')}
