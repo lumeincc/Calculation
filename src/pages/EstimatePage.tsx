@@ -116,8 +116,8 @@ function SectionBlock({ e, sec, start, first, last }: { e: Estimate; sec: Estima
                 <th className="w-28 px-1 py-2 font-medium">Тип</th>
                 <th className="w-16 px-1 py-2 font-medium">Ед.</th>
                 <th className="w-24 px-1 py-2 font-medium">Кол-во</th>
-                <th className="w-24 px-1 py-2 font-medium">Цена, ₽</th>
-                <th className="w-28 px-2 py-2 text-right font-medium">Сумма, ₽</th>
+                <th className="w-24 px-1 py-2 font-medium">Цена, ₸</th>
+                <th className="w-28 px-2 py-2 text-right font-medium">Сумма, ₸</th>
                 <th className="w-10" />
               </tr>
             </thead>

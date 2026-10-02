@@ -44,7 +44,7 @@ export function HomePage() {
         {[
           { icon: <Calculator size={20} />, title: '1. Посчитайте', text: 'Бетон, арматура, кирпич, кровля, отделка, грунт и металл — с учётом запаса и ГОСТ.' },
           { icon: <FileArchive size={20} />, title: '2. Загрузите документы', text: 'PDF, Excel, Word, DXF, ZIP/RAR/7z. Позиции из таблиц и профили металла найдутся сами.' },
-          { icon: <FileSpreadsheet size={20} />, title: '3. Соберите смету', text: 'Наценки, НР, СП, НДС 22%, скидки. Выгрузка в Excel с формулами и печать в PDF.' },
+          { icon: <FileSpreadsheet size={20} />, title: '3. Соберите смету', text: 'Наценки, НР, СП, НДС 16%, скидки. Выгрузка в Excel с формулами и печать в PDF.' },
         ].map((s) => (
           <div key={s.title} className="card p-5">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">{s.icon}</div>

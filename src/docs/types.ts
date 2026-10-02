@@ -37,7 +37,7 @@ export interface Position {
   sum: number
   /** Total mass of the line when known (mass column or computed from a profile). */
   massKg?: number
-  /** Price-catalog key (₽/т) when the row is a recognised metal profile with known mass. */
+  /** Price-catalog key (₸/т) when the row is a recognised metal profile with known mass. */
   metalPriceKey?: string
   kind: ItemKind
 }

@@ -40,7 +40,7 @@ export async function exportEstimateXlsx(e: Estimate, company: Company) {
   if (e.object) data.push([{ value: `Объект: ${e.object}`, columnSpan: 7 }])
   data.push([{ value: `Дата: ${fmtDate(Date.now())}`, columnSpan: 7 }])
   data.push([])
-  data.push(['№', 'Наименование', 'Тип', 'Ед. изм.', 'Кол-во', 'Цена, ₽', 'Сумма, ₽'].map((v) => ({ value: v, ...head })))
+  data.push(['№', 'Наименование', 'Тип', 'Ед. изм.', 'Кол-во', 'Цена, ₸', 'Сумма, ₸'].map((v) => ({ value: v, ...head })))
 
   const sumCells: string[] = []
   let n = 0

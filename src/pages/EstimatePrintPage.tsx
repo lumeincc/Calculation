@@ -71,8 +71,8 @@ export function EstimatePrintPage() {
               <th className="py-1 pr-2">Наименование</th>
               <th className="w-14 py-1 pr-2">Ед.</th>
               <th className="w-20 py-1 pr-2 text-right">Кол-во</th>
-              <th className="w-24 py-1 pr-2 text-right">Цена, ₽</th>
-              <th className="w-28 py-1 text-right">Сумма, ₽</th>
+              <th className="w-24 py-1 pr-2 text-right">Цена, ₸</th>
+              <th className="w-28 py-1 text-right">Сумма, ₸</th>
             </tr>
           </thead>
           {e.sections.map((sec) => (

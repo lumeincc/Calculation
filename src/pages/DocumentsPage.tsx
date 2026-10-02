@@ -155,7 +155,7 @@ export function DocumentsPage() {
 
   const toItems = (list: Position[]): Partial<EstimateItem>[] =>
     list.map((p) =>
-      // Unpriced metal rows are converted to tonnes and priced from the catalog (₽/т).
+      // Unpriced metal rows are converted to tonnes and priced from the catalog (₸/т).
       p.metalPriceKey && p.massKg && !p.price
         ? { kind: p.kind, name: `${p.name} (${fmt(p.qty, 3)} ${p.unit})`, unit: 'т', qty: round(p.massKg / 1000, 4), price: priceOf(p.metalPriceKey, overrides, custom), source: 'docs' }
         : { kind: p.kind, name: p.name, unit: p.unit || 'шт', qty: round(p.qty, 4), price: round(p.price, 2), source: 'docs' },

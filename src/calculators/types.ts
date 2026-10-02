@@ -83,7 +83,7 @@ export interface MaterialLine {
   unit: string
   qty: number
   kind: ItemKind
-  /** Catalog key; price = catalog price × priceFactor (e.g. ₽/кг × 25 кг in a bag). */
+  /** Catalog key; price = catalog price × priceFactor (e.g. ₸/кг × 25 кг in a bag). */
   priceKey?: string
   priceFactor?: number
   /** Fallback price when there is no catalog key. */

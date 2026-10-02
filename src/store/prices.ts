@@ -35,7 +35,12 @@ export const usePrices = create<PricesState>()(
       updateCustom: (key, patch) => set((s) => ({ custom: s.custom.map((c) => (c.key === key ? { ...c, ...patch } : c)) })),
       removeCustom: (key) => set((s) => ({ custom: s.custom.filter((c) => c.key !== key) })),
     }),
-    { name: 'sr-prices', version: 1 },
+    {
+      name: 'sr-prices',
+      version: 2,
+      // v2: switched to tenge — ruble overrides from v1 are dropped.
+      migrate: (state, version) => (version < 2 ? { ...(state as PricesState), overrides: {} } : (state as PricesState)),
+    },
   ),
 )
 
@@ -49,7 +54,7 @@ export function priceOf(key: string | undefined, overrides: Record<string, numbe
   return PRICE_MAP[key]?.price ?? custom.find((c) => c.key === key)?.price ?? 0
 }
 
-/** Unit price of a calculator line: catalog price × factor (e.g. ₽/кг × 25 кг bag), or its own price. */
+/** Unit price of a calculator line: catalog price × factor (e.g. ₸/кг × 25 кг bag), or its own price. */
 export function linePrice(line: MaterialLine, overrides: Record<string, number>, custom: PriceEntry[] = []): number {
   if (line.priceKey) return round(priceOf(line.priceKey, overrides, custom) * (line.priceFactor ?? 1), 2)
   return line.price ?? 0

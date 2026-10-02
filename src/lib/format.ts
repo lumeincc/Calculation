@@ -23,7 +23,7 @@ export function fmtInt(n: number): string {
 /** Money with 2 fixed decimals and the ruble sign. */
 export function money(n: number, withSign = true): string {
   const s = fmt(n, 2, 2)
-  return withSign ? `${s} ₽` : s
+  return withSign ? `${s} ₸` : s
 }
 
 /** Mass in kg presented as "850 кг" or "12,35 т" depending on magnitude. */

@@ -135,7 +135,7 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <NumberInput size="sm" className="w-28" value={p.price} unit="₽" onChange={(v) => changePrice(p, v)} aria-label="Цена за единицу" />
+                  <NumberInput size="sm" className="w-28" value={p.price} unit="₸" onChange={(v) => changePrice(p, v)} aria-label="Цена за единицу" />
                   <div className="w-28 text-right text-sm font-medium tabular-nums">{money(p.total)}</div>
                 </div>
               </li>

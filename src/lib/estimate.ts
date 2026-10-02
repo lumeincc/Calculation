@@ -78,7 +78,7 @@ export const DEFAULT_ESTIMATE_SETTINGS: EstimateSettings = {
   contingencyPct: 0,
   discountPct: 0,
   vatMode: 'none',
-  vatPct: 22,
+  vatPct: 16,
 }
 
 export function createSection(name = 'Новый раздел', items: EstimateItem[] = []): EstimateSection {

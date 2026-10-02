@@ -8,7 +8,6 @@ import { useEstimates } from '@/store/estimates'
 import { useDocs } from '@/store/docs'
 import { CommandPalette } from './CommandPalette'
 import { Toasts } from './Toasts'
-import { Logo } from './Logo'
 
 const NAV = [
   { to: '/', label: 'Главная', icon: Home, end: true },
@@ -121,7 +120,6 @@ export function Layout() {
     <div className="min-h-dvh">
       {/* Desktop sidebar */}
       <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-zinc-200 bg-white/80 px-3 py-4 backdrop-blur lg:flex dark:border-zinc-800 dark:bg-zinc-950/80">
-        <Logo className="mb-5 px-2" />
         <div className="mb-4 px-1">{searchButton}</div>
         <NavItems />
         <div className="mt-auto space-y-3 px-1">
@@ -135,7 +133,6 @@ export function Layout() {
         <button onClick={() => setMenu(true)} aria-label="Меню" className="-ml-1 rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Menu size={20} />
         </button>
-        <Logo />
         <button onClick={() => setPalette(true)} aria-label="Поиск" className="ml-auto rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
           <Search size={19} />
         </button>
@@ -145,8 +142,7 @@ export function Layout() {
         <div className="no-print fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-zinc-950/40" onClick={() => setMenu(false)} />
           <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white px-3 py-4 shadow-xl dark:bg-zinc-950">
-            <div className="mb-5 flex items-center justify-between px-2">
-              <Logo />
+            <div className="mb-5 flex items-center justify-end px-2">
               <button onClick={() => setMenu(false)} aria-label="Закрыть меню" className="rounded-md p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                 <X size={18} />
               </button>

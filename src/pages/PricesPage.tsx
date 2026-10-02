@@ -30,7 +30,7 @@ export function PricesPage() {
       <PageHeader
         icon={<Tags size={22} />}
         title="Справочник цен"
-        subtitle="Цены используются калькуляторами и при добавлении позиций в смету. Значения по умолчанию — ориентировочные средние по рынку, без НДС; укажите свои."
+        subtitle="Цены в тенге используются калькуляторами и при добавлении позиций в смету. Заполните свои цены — они сохранятся в браузере."
         actions={
           <>
             {changed > 0 && (
@@ -67,7 +67,7 @@ export function PricesPage() {
                     </div>
                     <span className="w-24 text-xs text-zinc-500">{KIND_LABEL[p.kind].one}</span>
                     <div className="flex items-center gap-2">
-                      <NumberInput size="sm" className="w-32" value={value} unit="₽" onChange={(v) => (p.custom ? updateCustom(p.key, { price: v }) : setPrice(p.key, v))} aria-label={`Цена: ${p.name}`} />
+                      <NumberInput size="sm" className="w-32" value={value} unit="₸" onChange={(v) => (p.custom ? updateCustom(p.key, { price: v }) : setPrice(p.key, v))} aria-label={`Цена: ${p.name}`} />
                       <span className="w-14 text-sm text-zinc-500">/ {p.unit}</span>
                       {p.custom ? (
                         <IconButton label="Удалить" onClick={() => removeCustom(p.key)}><Trash2 size={15} /></IconButton>
@@ -115,7 +115,7 @@ export function PricesPage() {
             <Select value={draft.unit} onChange={(v) => setDraft({ ...draft, unit: v })} options={UNITS.map((u) => ({ value: u, label: u }))} />
           </Field>
           <Field label="Цена за единицу">
-            <NumberInput value={draft.price} unit="₽" onChange={(v) => setDraft({ ...draft, price: v })} />
+            <NumberInput value={draft.price} unit="₸" onChange={(v) => setDraft({ ...draft, price: v })} />
           </Field>
         </div>
       </Modal>

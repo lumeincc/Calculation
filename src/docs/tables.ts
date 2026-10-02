@@ -13,7 +13,7 @@ const norm = (c: Cell | undefined) => String(c ?? '').toLowerCase().replace(/ё/
 /** «1 234,56» / «1234.56» / «1,234.56» → number; null when the cell is not a number. */
 export function parseNum(c: Cell | undefined): number | null {
   if (typeof c === 'number') return Number.isFinite(c) ? c : null
-  let s = String(c ?? '').replace(/[\s  ]/g, '').replace(/(руб\.?|₽|р\.)$/i, '')
+  let s = String(c ?? '').replace(/[\s  ]/g, '').replace(/(руб\.?|₽|р\.|₸|тг\.?|тенге)$/i, '')
   if (!s || !/^[-+]?[\d.,]+$/.test(s)) return null
   if (s.includes(',') && s.includes('.')) s = s.lastIndexOf('.') > s.lastIndexOf(',') ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.')
   else if ((s.match(/,/g)?.length ?? 0) === 1) s = s.replace(',', '.')
@@ -39,7 +39,7 @@ type Role = Exclude<keyof ColumnMap, 'massUnitT' | 'unitMassT'>
 
 const ROLE_TESTS: [Role, RegExp, RegExp?][] = [
   ['unit', /(^|\s)ед\.?(\s|$)|ед\.\s*изм|единиц|изм\./],
-  ['price', /цена|стоимость\s*(за\s*)?ед|за\s*ед|расценк|руб\.?\s*\/\s*(ед|шт|м|т)/],
+  ['price', /цена|стоимость\s*(за\s*)?ед|за\s*ед|расценк|(руб|тг|тенге)\.?\s*\/\s*(ед|шт|м|т)/],
   ['sum', /сумм|стоимость|(^|\s)всего|итого/],
   ['qty', /кол-?\s*во|количеств|^кол\.?$|^к-?во|объем(?!.*масс)|^кол /],
   ['length', /длин/],
