@@ -30,3 +30,5 @@ public/vendor
 server/web/*
 !server/web/README.txt
 server/data
+server/server
+server/stroyraschet
