@@ -132,7 +132,7 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       <span className="relative inline-flex shrink-0">
         <input id={id} type="checkbox" className="peer sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
         <span className="h-6 w-10 rounded-full bg-zinc-300 transition peer-checked:bg-brand-600 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/40 dark:bg-zinc-700" />
-        <span className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-4" />
+        <span className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition duration-300 ease-[cubic-bezier(.3,1.5,.6,1)] peer-checked:translate-x-4" />
       </span>
       <span className="text-sm text-zinc-700 dark:text-zinc-300">{label}</span>
     </label>

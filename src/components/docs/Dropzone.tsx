@@ -51,7 +51,7 @@ export function Dropzone({ onFiles, busy, progress, compact }: { onFiles(files: 
       }}
       onDragLeave={() => setOver(false)}
       onDrop={onDrop}
-      className={`relative rounded-2xl border-2 border-dashed transition ${over ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/30' : 'border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900'} ${compact ? 'px-4 py-3' : 'px-6 py-12'}`}
+      className={`relative rounded-2xl border-2 border-dashed transition ${over ? 'scale-[1.01] border-brand-500 bg-brand-50 shadow-lg shadow-brand-500/10 dark:bg-brand-950/30' : 'border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900'} ${compact ? 'px-4 py-3' : 'px-6 py-12'}`}
     >
       <input ref={files} type="file" multiple hidden onChange={(e) => onPick(e.target.files)} />
       <input ref={folder} type="file" multiple hidden onChange={(e) => onPick(e.target.files)} {...{ webkitdirectory: '' }} />
@@ -76,7 +76,7 @@ export function Dropzone({ onFiles, busy, progress, compact }: { onFiles(files: 
         </div>
       ) : (
         <div className="flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+          <div className="animate-float mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300">
             <UploadCloud size={28} />
           </div>
           <h2 className="text-lg font-semibold">Перетащите сюда файлы, папку или архив</h2>

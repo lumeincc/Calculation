@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { CatalogPicker } from '@/components/estimate/CatalogPicker'
 import { Button, ButtonLink, IconButton } from '@/components/ui/Button'
 import { Field, NumberInput, Segmented, TextInput } from '@/components/ui/Field'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { Badge } from '@/components/ui/misc'
 import {
   computeTotals, KIND_LABEL, KINDS, lineTotal, sectionTotal, UNITS,
@@ -89,7 +90,7 @@ function SectionBlock({ e, sec, start, first, last }: { e: Estimate; sec: Estima
   const addItems = useEstimates((s) => s.addItems)
   const [picker, setPicker] = useState(false)
   return (
-    <section className="card overflow-hidden">
+    <section className="card animate-fade-up overflow-hidden">
       <div className="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50/80 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/60">
         <input
           value={sec.name}
@@ -153,7 +154,7 @@ function Row({ label, value, strong, muted }: { label: React.ReactNode; value: n
   return (
     <div className={`flex items-baseline justify-between gap-3 py-1 ${strong ? 'text-base font-semibold' : 'text-sm'} ${muted ? 'text-zinc-500' : ''}`}>
       <span>{label}</span>
-      <span className="tabular-nums">{money(value)}</span>
+      <AnimatedNumber value={value} format={money} />
     </div>
   )
 }

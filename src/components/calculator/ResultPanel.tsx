@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { CalcResult, MaterialLine } from '@/calculators/types'
 import { AddToEstimateDialog } from '@/components/estimate/AddToEstimateDialog'
 import { Button } from '@/components/ui/Button'
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber'
 import { NumberInput } from '@/components/ui/Field'
 import { Badge } from '@/components/ui/misc'
 import { KIND_LABEL, lineTotal } from '@/lib/estimate'
@@ -16,7 +17,7 @@ const kindTone = { material: 'zinc', work: 'blue', machine: 'amber', transport: 
 export function MetricValue({ value, digits = 2, unit }: { value: number; digits?: number; unit?: string }) {
   return (
     <>
-      <span className="tabular-nums">{fmt(value, digits)}</span>
+      <AnimatedNumber value={value} digits={digits} />
       {unit && <span className="ml-1 text-zinc-500">{unit}</span>}
     </>
   )
@@ -64,9 +65,9 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
   return (
     <div className="space-y-4">
       {primary.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <div className="stagger grid grid-cols-2 gap-3 xl:grid-cols-3">
           {primary.map((m, i) => (
-            <div key={m.label} className={`rounded-xl border p-3.5 ${i === 0 ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
+            <div key={m.label} className={`lift rounded-xl border p-3.5 ${i === 0 ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-950/40' : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'}`}>
               <div className="text-xs leading-snug font-medium text-zinc-500 dark:text-zinc-400">{m.label}</div>
               <div className="mt-1 text-xl font-semibold tracking-tight">
                 <MetricValue value={m.value} digits={m.digits} unit={m.unit} />
@@ -108,7 +109,7 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
             <h3 className="text-sm font-semibold">Материалы и работы</h3>
             <span className="text-xs text-zinc-500">цены — из справочника, можно изменить</span>
           </div>
-          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <ul className="stagger divide-y divide-zinc-100 dark:divide-zinc-800">
             {priced.map((p) => (
               <li key={p.key} className={`flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 ${p.on ? '' : 'opacity-45'}`}>
                 <input
@@ -144,7 +145,7 @@ export function ResultPanel({ result, sectionName, source }: { result: CalcResul
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
             <div>
               <div className="text-xs text-zinc-500">Итого по расчёту</div>
-              <div className="text-xl font-semibold tabular-nums">{money(total)}</div>
+              <div className="text-xl font-semibold tabular-nums"><AnimatedNumber value={total} format={money} /></div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={copy}>

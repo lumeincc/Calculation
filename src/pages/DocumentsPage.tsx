@@ -209,7 +209,7 @@ export function DocumentsPage() {
       <div>
         <PageHeader icon={<FolderOpen size={22} />} title="Документы" subtitle="Загрузите проектную документацию: сметы, спецификации, ведомости, чертежи. Архивы распаковываются автоматически." />
         <Dropzone onFiles={(f) => void ingest(f)} busy={busy} progress={progress} />
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="stagger mt-6 grid gap-4 md:grid-cols-3">
           {[
             { icon: <Archive size={18} />, title: 'Архивы любой вложенности', text: 'ZIP, RAR, 7Z, TAR, GZ. Русские имена из архивов Windows (CP866) читаются корректно.' },
             { icon: <Layers size={18} />, title: 'Таблицы и позиции', text: 'Сайт находит в Excel, PDF и Word таблицы смет и спецификаций: наименование, ед., количество, цену, сумму.' },
@@ -256,10 +256,10 @@ export function DocumentsPage() {
         />
       </div>
 
-      <div className="mt-5">
+      <div key={tab} className="mt-5 animate-fade-up">
         {tab === 'summary' && (
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat label="Документов" value={docs.length} hint={Object.entries(counts).map(([k, n]) => `${DOC_KIND[k as DocKind]}: ${n}`).join(' · ')} />
               <Stat label="Найдено позиций" value={positions.length} hint={`на ${money(positions.reduce((s, p) => s + p.sum, 0))}`} />
               <Stat label="Металл" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={`${activeSources.size} из ${sourceInfo.sources.length} документов, без дублей`} />
@@ -276,7 +276,7 @@ export function DocumentsPage() {
                 {errors.map((f) => <div key={f.id} className="text-sm"><b>{f.path}</b>: <span className="text-red-600">{analyses[f.id]?.error}</span></div>)}
               </div>
             )}
-            <div className="card divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div className="stagger card divide-y divide-zinc-100 dark:divide-zinc-800">
               {docs.map((f) => {
                 const a = analyses[f.id]
                 return (
@@ -446,7 +446,7 @@ export function DocumentsPage() {
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Общий тоннаж" value={fmt(metalKg / 1000, 3)} unit="т" accent />
                 <Stat label="Профилей" value={metalGroups.length} />
                 <Stat label="Строк спецификаций" value={metal.length} hint={unknownMass ? `без массы: ${unknownMass}` : undefined} />

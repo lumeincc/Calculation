@@ -60,7 +60,7 @@ export function EstimatesPage() {
           action={<Button variant="primary" onClick={() => navigate(`/estimates/${create('Новая смета', defaults)}`)}><Plus size={16} /> Создать смету</Button>}
         />
       ) : (
-        <div className="card divide-y divide-zinc-100 dark:divide-zinc-800">
+        <div className="stagger card divide-y divide-zinc-100 dark:divide-zinc-800">
           {sorted.map((e) => {
             const t = computeTotals(e)
             return (

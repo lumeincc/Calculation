@@ -24,7 +24,7 @@ export function CalculatorsPage() {
         <Search size={17} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400" />
         <input className="input h-11 pl-10" placeholder="Что посчитать? Например: швеллер, газобетон, щебень" value={q} onChange={(e) => update({ q: e.target.value })} autoFocus />
       </div>
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="stagger mb-6 flex flex-wrap gap-2">
         <Chip active={!cat} onClick={() => update({ cat: '' })}>Все</Chip>
         {CATEGORIES.map((c) => (
           <Chip key={c.id} active={cat === c.id} onClick={() => update({ cat: c.id })}>
@@ -35,7 +35,7 @@ export function CalculatorsPage() {
       {list.length === 0 ? (
         <EmptyState icon={<Search size={28} />} title="Ничего не найдено" text="Попробуйте другой запрос или сбросьте фильтр." />
       ) : q || cat ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{list.map((c) => <CalculatorCard key={c.id} calc={c} />)}</div>
+        <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{list.map((c) => <CalculatorCard key={c.id} calc={c} />)}</div>
       ) : (
         <div className="space-y-8">
           {CATEGORIES.map((c) => {
@@ -46,7 +46,7 @@ export function CalculatorsPage() {
                 <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400">
                   <c.icon size={16} /> {c.title}
                 </h2>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map((x) => <CalculatorCard key={x.id} calc={x} />)}</div>
+                <div className="stagger grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{items.map((x) => <CalculatorCard key={x.id} calc={x} />)}</div>
               </section>
             )
           })}
