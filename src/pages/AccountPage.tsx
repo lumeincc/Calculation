@@ -1,5 +1,5 @@
 import {
-  ArrowRight, Building2, Check, ChevronDown, CircleAlert, Cloud, CloudOff, Copy, Eye, EyeOff, FileSpreadsheet, KeyRound, Loader2, Lock,
+  ArrowRight, Building2, Check, ChevronDown, CircleAlert, CloudOff, Copy, Eye, EyeOff, FileSpreadsheet, KeyRound, Loader2, Lock,
   LogOut, Mail, RefreshCw, Server, ShieldCheck, Tags, Trash2, UserRound, Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -93,9 +93,6 @@ function AuthForm() {
   return (
     <div className="mx-auto grid max-w-5xl items-center gap-10 py-4 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[1fr_440px] lg:py-0">
       <div className="stagger hidden lg:block">
-        <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-lg dark:bg-white dark:text-zinc-900">
-          <Cloud size={24} />
-        </div>
         <h1 className="text-4xl font-semibold tracking-tight text-balance">Работайте над сметами всей командой</h1>
         <p className="mt-3 max-w-md text-zinc-600 dark:text-zinc-400">Один аккаунт компании — общие сметы, цены и реквизиты на любом компьютере и телефоне.</p>
         <ul className="mt-8 space-y-4">
