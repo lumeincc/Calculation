@@ -36,7 +36,7 @@ export async function exportEstimateXlsx(e: Estimate, company: Company) {
   const data: SheetData = []
   const title = e.docType === 'offer' ? T('Коммерческое предложение') : T('Сметный расчёт')
   data.push([{ value: `${title}: ${e.name}`, fontWeight: 'bold', fontSize: 14, columnSpan: 7 }])
-  if (company.name) data.push([{ value: Tf('Исполнитель: {0}{1}', [company.name, company.inn ? Tf(', ИНН {0}', [company.inn]) : '']), columnSpan: 7 }])
+  if (company.name) data.push([{ value: Tf('Исполнитель: {0}{1}', [company.name, company.inn ? Tf(', БИН {0}', [company.inn]) : '']), columnSpan: 7 }])
   if (e.client) data.push([{ value: Tf('Заказчик: {0}', [e.client]), columnSpan: 7 }])
   if (e.object) data.push([{ value: Tf('Объект: {0}', [e.object]), columnSpan: 7 }])
   data.push([{ value: Tf('Дата: {0}', [fmtDate(Date.now())]), columnSpan: 7 }])
@@ -122,7 +122,7 @@ export async function exportTableXlsx(filename: string, sheet: string, header: s
   downloadBlob(blob, `${safeFileName(filename)}.xlsx`)
 }
 
-const BACKUP_KEYS = ['sr-estimates', 'sr-prices', 'sr-settings', 'sr-calc', 'sr-metal-spec']
+const BACKUP_KEYS = ['sr-estimates', 'sr-prices', 'sr-settings', 'sr-calc', 'sr-metal-spec', 'sr-office']
 
 export function exportBackup() {
   const data: Record<string, unknown> = { app: 'stroyraschet', version: 1, exportedAt: new Date().toISOString() }

@@ -10,12 +10,26 @@ import { toast } from '@/store/toast'
 import { LANGS, lang, setLang, T, type Lang } from '@/i18n'
 
 const COMPANY_FIELDS: [keyof Company, string, string][] = [
-  ['name', T('Организация / ИП'), T('ООО «Строймонтаж»')],
-  ['inn', T('ИНН'), '7700000000'],
-  ['address', T('Адрес'), T('г. Москва, ул. Строителей, 1')],
-  ['phone', T('Телефон'), '+7 900 000-00-00'],
-  ['email', 'E-mail', 'info@example.ru'],
-  ['signer', T('Подписант'), T('Директор Иванов И. И.')],
+  ['name', T('Организация / ИП'), T('ТОО «Строймонтаж»')],
+  ['inn', T('БИН / ИИН'), '123456789012'],
+  ['address', T('Адрес'), T('г. Алматы, ул. Строителей, 1')],
+  ['city', T('Город (для договоров)'), T('г. Алматы')],
+  ['phone', T('Телефон'), '+7 700 000-00-00'],
+  ['email', 'E-mail', 'info@example.kz'],
+]
+
+const BANK_FIELDS: [keyof Company, string, string][] = [
+  ['bank', T('Банк'), T('АО «Kaspi Bank»')],
+  ['iik', T('ИИК (IBAN)'), 'KZ00 0000 0000 0000 0000'],
+  ['bik', T('БИК'), 'CASPKZKA'],
+  ['kbe', T('КБе'), '17'],
+]
+
+const SIGNER_FIELDS: [keyof Company, string, string][] = [
+  ['position', T('Должность подписанта'), T('Директор')],
+  ['signer', T('Подписант (Фамилия И. О.)'), T('Иванов И. И.')],
+  ['represented', T('В лице (родительный падеж)'), T('директора Иванова Ивана Ивановича')],
+  ['basis', T('Действует на основании'), T('Устава')],
 ]
 
 export function SettingsPage() {
@@ -26,15 +40,20 @@ export function SettingsPage() {
       <PageHeader title={T('Настройки')} />
       <div className="space-y-6">
         <section className="card p-5">
-          <h2 className="mb-1 font-semibold">{T('Реквизиты исполнителя')}</h2>
-          <p className="mb-4 text-sm text-zinc-500">{T('Печатаются в шапке смет и коммерческих предложений.')}</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {COMPANY_FIELDS.map(([k, label, ph]) => (
-              <Field key={k} label={label}>
-                <TextInput value={company[k]} placeholder={ph} onChange={(e) => setCompany({ [k]: e.target.value })} />
-              </Field>
-            ))}
-          </div>
+          <h2 className="mb-1 font-semibold">{T('Реквизиты компании')}</h2>
+          <p className="mb-4 text-sm text-zinc-500">{T('Печатаются в сметах, коммерческих предложениях, договорах и счетах.')}</p>
+          {([[null, COMPANY_FIELDS], [T('Банковские реквизиты'), BANK_FIELDS], [T('Подписант'), SIGNER_FIELDS]] as const).map(([title, fields]) => (
+            <div key={title ?? 'main'} className={title ? 'mt-5' : ''}>
+              {title && <h3 className="mb-3 text-sm font-semibold text-zinc-500">{title}</h3>}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {fields.map(([k, label, ph]) => (
+                  <Field key={k} label={label}>
+                    <TextInput value={company[k] ?? ''} placeholder={ph} onChange={(e) => setCompany({ [k]: e.target.value })} />
+                  </Field>
+                ))}
+              </div>
+            </div>
+          ))}
         </section>
 
         <section className="card p-5">

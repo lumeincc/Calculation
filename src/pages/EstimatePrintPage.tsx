@@ -49,7 +49,7 @@ export function EstimatePrintPage() {
         <header className="mb-5 flex justify-between gap-6 border-b border-black pb-3">
           <div>
             <div className="text-[15px] font-bold">{company.name || T('Исполнитель')}</div>
-            {company.inn && <div>{T('ИНН')} {company.inn}</div>}
+            {company.inn && <div>{T('БИН')} {company.inn}</div>}
             {company.address && <div>{company.address}</div>}
             {(company.phone || company.email) && <div>{[company.phone, company.email].filter(Boolean).join(' · ')}</div>}
           </div>

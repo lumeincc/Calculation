@@ -2,27 +2,8 @@ import { FolderUp, Loader2, UploadCloud } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { SUPPORTED_HINT } from '@/docs/detect'
 import type { InputFile } from '@/docs/unpack'
+import { collectDropped, readPicked } from '@/docs/dropRead'
 import { T } from '@/i18n'
-
-async function readFile(file: File, path?: string): Promise<InputFile> {
-  return { name: file.name, path: path || (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name, data: new Uint8Array(await file.arrayBuffer()) }
-}
-
-/** Walks dropped folders (DataTransferItem.webkitGetAsEntry) keeping relative paths. */
-async function fromEntry(entry: FileSystemEntry, out: Promise<InputFile>[]): Promise<void> {
-  if (entry.isFile) {
-    const file = await new Promise<File>((res, rej) => (entry as FileSystemFileEntry).file(res, rej))
-    out.push(readFile(file, entry.fullPath.replace(/^\//, '')))
-  } else if (entry.isDirectory) {
-    const reader = (entry as FileSystemDirectoryEntry).createReader()
-    // readEntries returns results in batches until an empty batch.
-    for (;;) {
-      const batch = await new Promise<FileSystemEntry[]>((res, rej) => reader.readEntries(res, rej))
-      if (!batch.length) break
-      for (const e of batch) await fromEntry(e, out)
-    }
-  }
-}
 
 export function Dropzone({ onFiles, busy, progress, compact }: { onFiles(files: InputFile[]): void; busy: boolean; progress?: { done: number; total: number; label: string }; compact?: boolean }) {
   const [over, setOver] = useState(false)
@@ -32,16 +13,11 @@ export function Dropzone({ onFiles, busy, progress, compact }: { onFiles(files: 
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setOver(false)
-    const items = [...e.dataTransfer.items]
-    const entries = items.map((i) => i.webkitGetAsEntry?.()).filter(Boolean) as FileSystemEntry[]
-    const reads: Promise<InputFile>[] = []
-    if (entries.length) for (const en of entries) await fromEntry(en, reads)
-    else for (const f of e.dataTransfer.files) reads.push(readFile(f))
-    onFiles(await Promise.all(reads))
+    onFiles(await collectDropped(e.dataTransfer))
   }
   const onPick = async (list: FileList | null) => {
     if (!list?.length) return
-    onFiles(await Promise.all([...list].map((f) => readFile(f))))
+    onFiles(await readPicked(list))
   }
 
   return (

@@ -1,0 +1,10 @@
+// Document-flow section, loaded as a separate chunk.
+export { ContractPage } from './pages/ContractPage'
+export { ContractsPage } from './pages/ContractsPage'
+export { CounterpartiesPage, CounterpartyPage } from './pages/CounterpartiesPage'
+export { FilesPage } from './pages/FilesPage'
+export { OfficeHome } from './pages/OfficeHome'
+export { PaperPage } from './pages/PaperPage'
+export { PapersPage } from './pages/PapersPage'
+export { OfficePrintPage } from './pages/PrintPage'
+export { TemplatePage, TemplatesPage } from './pages/TemplatesPage'

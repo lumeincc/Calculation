@@ -1,8 +1,9 @@
-import { FileSpreadsheet, FolderOpen, Search, Settings, Tags } from 'lucide-react'
+import { Archive, Building2, FileSignature, FileSpreadsheet, FolderOpen, Receipt, Search, Settings, Tags } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { searchCalculators } from '@/calculators/registry'
 import { useEstimates } from '@/store/estimates'
+import { useOffice } from '@/office/store'
 import { T } from '@/i18n'
 
 interface Item {
@@ -17,6 +18,11 @@ const PAGES: Item[] = [
   { id: 'p-docs', title: T('Документы'), subtitle: T('Загрузить файлы и архивы'), icon: <FolderOpen size={18} />, to: '/docs' },
   { id: 'p-est', title: T('Сметы'), subtitle: T('Список смет'), icon: <FileSpreadsheet size={18} />, to: '/estimates' },
   { id: 'p-prices', title: T('Справочник цен'), icon: <Tags size={18} />, to: '/prices' },
+  { id: 'p-office', title: T('Документооборот'), subtitle: T('Договоры, счета, акты, архив'), icon: <FileSignature size={18} />, to: '/office' },
+  { id: 'p-contracts', title: T('Договоры'), icon: <FileSignature size={18} />, to: '/office/contracts' },
+  { id: 'p-papers', title: T('Счета и акты'), icon: <Receipt size={18} />, to: '/office/papers' },
+  { id: 'p-cps', title: T('Контрагенты'), icon: <Building2 size={18} />, to: '/office/counterparties' },
+  { id: 'p-files', title: T('Архив файлов'), icon: <Archive size={18} />, to: '/office/files' },
   { id: 'p-settings', title: T('Настройки'), icon: <Settings size={18} />, to: '/settings' },
 ]
 
@@ -25,6 +31,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose(): vo
   const [active, setActive] = useState(0)
   const navigate = useNavigate()
   const estimates = useEstimates((s) => s.estimates)
+  const office = useOffice()
   const ref = useRef<HTMLDialogElement>(null)
   const input = useRef<HTMLInputElement>(null)
 
@@ -47,9 +54,28 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose(): vo
       .filter((e) => ql && e.name.toLowerCase().includes(ql))
       .slice(0, 5)
       .map((e) => ({ id: e.id, title: e.name, subtitle: T('Смета'), icon: <FileSpreadsheet size={18} />, to: `/estimates/${e.id}` }))
+    const cpName = new Map(office.counterparties.map((c) => [c.id, c.name]))
+    const contracts = ql
+      ? office.contracts
+          .filter((c) => [c.number, c.title, c.object, cpName.get(c.counterpartyId ?? '') ?? ''].join(' ').toLowerCase().includes(ql))
+          .slice(0, 5)
+          .map((c) => ({ id: c.id, title: `${T('Договор')} № ${c.number}`, subtitle: [cpName.get(c.counterpartyId ?? ''), c.title].filter(Boolean).join(' · '), icon: <FileSignature size={18} />, to: `/office/contracts/${c.id}` }))
+      : []
+    const cps = ql
+      ? office.counterparties
+          .filter((c) => [c.name, c.bin].join(' ').toLowerCase().includes(ql))
+          .slice(0, 5)
+          .map((c) => ({ id: c.id, title: c.name, subtitle: T('Контрагент'), icon: <Building2 size={18} />, to: `/office/counterparties/${c.id}` }))
+      : []
+    const files = ql
+      ? office.files
+          .filter((f) => [f.name, ...f.tags].join(' ').toLowerCase().includes(ql))
+          .slice(0, 5)
+          .map((f) => ({ id: f.id, title: f.name, subtitle: T('Файл в архиве'), icon: <Archive size={18} />, to: f.folderId ? `/office/files?folder=${f.folderId}` : '/office/files' }))
+      : []
     const pages = PAGES.filter((p) => !ql || p.title.toLowerCase().includes(ql))
-    return [...calcs, ...est, ...pages].slice(0, 30)
-  }, [q, estimates])
+    return [...calcs, ...est, ...contracts, ...cps, ...files, ...pages].slice(0, 30)
+  }, [q, estimates, office])
 
   const go = (it: Item | undefined) => {
     if (!it) return

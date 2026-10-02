@@ -1,27 +1,13 @@
-import {
-  Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Search, Settings, Tags, Weight, type LucideIcon,
-} from 'lucide-react'
+import { Search, type LucideIcon } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router'
 import { useSyncStatus } from '@/lib/sync'
+import { useOffice } from '@/office/store'
 import { useAuth } from '@/store/auth'
 import { useDocs } from '@/store/docs'
 import { useEstimates } from '@/store/estimates'
+import { BACK_TO_MAIN, BOTTOM_NAV, isOffice, MAIN_NAV, OFFICE_ENTRY, OFFICE_NAV } from './nav'
 import { TonnaLogo } from './TonnaLogo'
 import { T } from '@/i18n'
-
-const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
-  { to: '/', label: T('Главная'), icon: Home, end: true },
-  { to: '/calc', label: T('Калькуляторы'), icon: Calculator, end: true },
-  { to: '/docs', label: T('Документы'), icon: FolderOpen },
-  { to: '/estimates', label: T('Сметы'), icon: FileSpreadsheet },
-  { to: '/calc/metal', label: T('Тоннаж металла'), icon: Weight },
-  { to: '/prices', label: T('Справочник цен'), icon: Tags },
-]
-
-const BOTTOM = [
-  { to: '/account', label: T('Аккаунт и команда'), icon: CircleUserRound },
-  { to: '/settings', label: T('Настройки'), icon: Settings },
-]
 
 function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
   label: string; icon: LucideIcon; active?: boolean; badge?: number; dot?: string; onClick?: () => void; to?: string; end?: boolean
@@ -67,27 +53,29 @@ function Tile({ label, icon: Icon, active, badge, dot, onClick, to, end }: {
 export function Dock({ onSearch }: { onSearch(): void }) {
   const estimates = useEstimates((s) => s.estimates.length)
   const docs = useDocs((s) => s.files.filter((f) => f.kind !== 'archive').length)
+  const contracts = useOffice((s) => s.contracts.filter((c) => c.status === 'review' || c.status === 'signing').length)
   const loggedIn = useAuth((s) => Boolean(s.token))
   const sync = useSyncStatus((s) => s.status)
-  useLocation() // re-render on navigation so the active tile updates
-  const counts: Record<string, number> = { '/estimates': estimates, '/docs': docs }
+  const office = isOffice(useLocation().pathname)
+  const counts: Record<string, number> = { '/estimates': estimates, '/docs': docs, '/office/contracts': contracts }
   const syncDot = !loggedIn ? undefined : sync === 'error' ? 'bg-red-500' : sync === 'offline' ? 'bg-amber-500' : 'bg-emerald-500'
+  const divider = <span className="my-0.5 h-px w-8 bg-zinc-200 dark:bg-zinc-700" />
 
   return (
-    <aside
-      className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-center lg:flex"
-    >
+    <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-[84px] items-center lg:flex">
       <nav className="mx-auto flex w-[64px] flex-col items-center gap-2 rounded-[22px] border border-zinc-200/70 bg-white/60 py-3 shadow-xl shadow-zinc-900/5 backdrop-blur-xl dark:border-zinc-700/60 dark:bg-zinc-900/60 dark:shadow-black/40">
-        <NavLink to="/" aria-label={T('TONNA — на главную')} className="mb-1 flex h-12 items-center justify-center text-zinc-900 dark:text-white">
+        <NavLink to={office ? '/office' : '/'} aria-label={office ? T('Документооборот') : T('TONNA — на главную')} className="mb-1 flex flex-col items-center justify-center text-zinc-900 dark:text-white">
           <TonnaLogo className="h-11 w-auto" />
+          {office && <span className="mt-1 text-[9px] font-bold tracking-[0.18em]">DOCS</span>}
         </NavLink>
         <Tile label={T('Поиск (Ctrl K)')} icon={Search} onClick={onSearch} />
-        <span className="my-0.5 h-px w-8 bg-zinc-200 dark:bg-zinc-700" />
-        {NAV.map((n) => (
+        {divider}
+        {(office ? OFFICE_NAV : MAIN_NAV).map((n) => (
           <Tile key={n.to} to={n.to} end={n.end} label={n.label} icon={n.icon} badge={counts[n.to]} />
         ))}
-        <span className="my-0.5 h-px w-8 bg-zinc-200 dark:bg-zinc-700" />
-        {BOTTOM.map((n) => (
+        {divider}
+        {office ? <Tile to={BACK_TO_MAIN.to} end label={BACK_TO_MAIN.label} icon={BACK_TO_MAIN.icon} /> : <Tile to={OFFICE_ENTRY.to} label={OFFICE_ENTRY.label} icon={OFFICE_ENTRY.icon} badge={contracts} />}
+        {BOTTOM_NAV.map((n) => (
           <Tile key={n.to} to={n.to} label={n.label} icon={n.icon} dot={n.to === '/account' ? syncDot : undefined} />
         ))}
       </nav>

@@ -1,5 +1,5 @@
 import {
-  Calculator, CircleUserRound, FileSpreadsheet, FolderOpen, Home, Menu, Monitor, Moon, Search, Settings, Sun, Tags, Weight, X,
+  Menu, Monitor, Moon, Search, Sun, X,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
@@ -8,32 +8,24 @@ import { useEstimates } from '@/store/estimates'
 import { useDocs } from '@/store/docs'
 import { CommandPalette } from './CommandPalette'
 import { Dock } from './Dock'
+import { BACK_TO_MAIN, BOTTOM_NAV, isOffice, MAIN_NAV, OFFICE_ENTRY, OFFICE_NAV } from './nav'
 import { TonnaLogo } from './TonnaLogo'
 import { Toasts } from './Toasts'
 import { LANGS, lang, setLang, T } from '@/i18n'
-
-const NAV_FULL = [
-  { to: '/', label: T('Главная'), icon: Home, end: true },
-  { to: '/calc', label: T('Калькуляторы'), icon: Calculator },
-  { to: '/docs', label: T('Документы'), icon: FolderOpen },
-  { to: '/estimates', label: T('Сметы'), icon: FileSpreadsheet },
-  { to: '/calc/metal', label: T('Тоннаж металла'), icon: Weight },
-  { to: '/prices', label: T('Справочник цен'), icon: Tags },
-  { to: '/account', label: T('Аккаунт и команда'), icon: CircleUserRound },
-  { to: '/settings', label: T('Настройки'), icon: Settings },
-]
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const estimates = useEstimates((s) => s.estimates.length)
   const docs = useDocs((s) => s.files.filter((f) => f.kind !== 'archive').length)
   const count: Record<string, number> = { '/estimates': estimates, '/docs': docs }
+  const office = isOffice(useLocation().pathname)
+  const items = office ? [...OFFICE_NAV, BACK_TO_MAIN, ...BOTTOM_NAV] : [...MAIN_NAV, OFFICE_ENTRY, ...BOTTOM_NAV]
   return (
     <nav className="flex flex-col gap-0.5">
-      {NAV_FULL.map(({ to, label, icon: Icon, end }) => (
+      {items.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}
-          end={end ?? to === '/calc'}
+          end={end}
           onClick={onNavigate}
           className={({ isActive }) =>
             `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${

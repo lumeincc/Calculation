@@ -11,6 +11,15 @@ export interface Company {
   phone: string
   email: string
   signer: string
+  /** Bank details and signer data for contracts and invoices (document flow). */
+  bank?: string
+  iik?: string
+  bik?: string
+  kbe?: string
+  position?: string
+  represented?: string
+  basis?: string
+  city?: string
 }
 
 interface SettingsState {

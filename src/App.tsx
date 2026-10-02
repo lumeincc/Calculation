@@ -18,6 +18,12 @@ import { T } from '@/i18n'
 const DocumentsPage = lazy(() => import('@/pages/DocumentsPage').then((m) => ({ default: m.DocumentsPage })))
 const EstimatePrintPage = lazy(() => import('@/pages/EstimatePrintPage').then((m) => ({ default: m.EstimatePrintPage })))
 
+type OfficeModule = typeof import('@/office')
+const office = (name: keyof OfficeModule) => {
+  const Page = lazy(() => import('@/office').then((m) => ({ default: m[name] })))
+  return <Suspense fallback={fallback}><Page /></Suspense>
+}
+
 const fallback = <div className="p-10 text-center text-sm text-zinc-500">{T('Загрузка…')}</div>
 
 // Hash routing keeps the build deployable to any static hosting without rewrites.
@@ -34,9 +40,20 @@ const router = createHashRouter([
       { path: '/prices', element: <PricesPage /> },
       { path: '/settings', element: <SettingsPage /> },
       { path: '/account', element: <AccountPage /> },
+      { path: '/office', element: office('OfficeHome') },
+      { path: '/office/contracts', element: office('ContractsPage') },
+      { path: '/office/contracts/:id', element: office('ContractPage') },
+      { path: '/office/papers', element: office('PapersPage') },
+      { path: '/office/papers/:id', element: office('PaperPage') },
+      { path: '/office/counterparties', element: office('CounterpartiesPage') },
+      { path: '/office/counterparties/:id', element: office('CounterpartyPage') },
+      { path: '/office/files', element: office('FilesPage') },
+      { path: '/office/templates', element: office('TemplatesPage') },
+      { path: '/office/templates/:id', element: office('TemplatePage') },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
+  { path: '/office/print/:type/:id', element: office('OfficePrintPage') },
   { path: '/estimates/:id/print', element: <Suspense fallback={fallback}><EstimatePrintPage /></Suspense> },
 ])
 

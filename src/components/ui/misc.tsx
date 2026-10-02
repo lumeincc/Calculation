@@ -13,7 +13,7 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
           {subtitle && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{subtitle}</p>}
         </div>
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2 lg:shrink-0">{actions}</div>}
     </div>
   )
 }
