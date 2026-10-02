@@ -10,7 +10,7 @@ import { AddToEstimateDialog } from '@/components/estimate/AddToEstimateDialog'
 import { Button, IconButton } from '@/components/ui/Button'
 import { Badge, EmptyState, PageHeader, Stat, Tabs } from '@/components/ui/misc'
 import { KIND_LABEL as DOC_KIND } from '@/docs/detect'
-import { metalSources } from '@/docs/metalSources'
+import { extraMetal, metalSources, type MetalSource } from '@/docs/metalSources'
 import type { DocFile, DocKind, MetalHit, Position } from '@/docs/types'
 import { createItem, createSection, KIND_LABEL, type EstimateItem } from '@/lib/estimate'
 import { downloadBytes, exportTableXlsx } from '@/lib/export'
@@ -128,7 +128,12 @@ export function DocumentsPage() {
   // Only selected documents count — the same metal is often listed in several of them.
   const metal = useMemo(() => allMetal.filter((h) => activeSources.has(h.fileId)), [allMetal, activeSources])
   const metalGroups = useMemo(() => groupMetal(metal), [metal])
-  const metalKg = metalGroups.reduce((s, g) => s + g.massKg, 0)
+  const profileKg = metalGroups.reduce((s, g) => s + g.massKg, 0)
+  const extras = useMemo(() => extraMetal(docs, positions), [docs, positions])
+  const [extraSel, setExtraSel] = useState<Set<string> | null>(null)
+  const activeExtras = extraSel ?? new Set(extras.map((x) => x.fileId))
+  const extraKg = extras.filter((x) => activeExtras.has(x.fileId)).reduce((s, x) => s + x.kg, 0)
+  const metalKg = profileKg + extraKg
   const unknownMass = metal.filter((h) => h.massKg === null).length
   const selectedPositions = checked ?? new Set(positions.map((p) => p.id))
   const selected = selectedId ? byId.get(selectedId) : undefined
@@ -423,9 +428,15 @@ export function DocumentsPage() {
             <div className="space-y-4">
               <div className="card p-4">
                 <h3 className="text-sm font-semibold">Какие документы считать</h3>
-                <p className="mt-0.5 mb-3 text-xs text-zinc-500">Один и тот же металл часто есть в нескольких документах (выборка, реестр, техкарта). Документы с одинаковым итогом считаются дублями — по умолчанию учитывается итоговая выборка.</p>
-                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                  {sourceInfo.sources.map((src) => (
+                <p className="mt-0.5 mb-3 text-xs text-zinc-500">Один и тот же металл обычно есть в нескольких документах (выборка, реестр, техкарта, чертежи). Документы с одинаковым итогом — дубли; если есть итоговая выборка, считается только она, а остальные служат для сверки.</p>
+                {sourceInfo.check && (
+                  <div className={`mb-3 rounded-lg px-3 py-2 text-sm ${Math.abs(sourceInfo.check.coveredKg - sourceInfo.check.summaryKg) <= 0.02 * sourceInfo.check.summaryKg ? 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200' : 'bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'}`}>
+                    Сверка: {sourceInfo.check.files} {plural(sourceInfo.check.files, ['документ', 'документа', 'документов'])} без выборки дают <b className="tabular-nums">{fmt(sourceInfo.check.coveredKg / 1000, 3)} т</b>, выборка — <b className="tabular-nums">{fmt(sourceInfo.check.summaryKg / 1000, 3)} т</b>
+                    {' '}(расхождение {fmt((Math.abs(sourceInfo.check.coveredKg - sourceInfo.check.summaryKg) / sourceInfo.check.summaryKg) * 100, 2)}%).
+                  </div>
+                )}
+                {(() => {
+                  const row = (src: MetalSource) => (
                     <label key={src.fileId} className="flex cursor-pointer items-center gap-3 py-2 text-sm">
                       <input
                         type="checkbox"
@@ -441,20 +452,60 @@ export function DocumentsPage() {
                       <span className="min-w-0 flex-1 truncate" title={byId.get(src.fileId)?.path}>{src.name}</span>
                       {src.summary && <Badge tone="green">выборка</Badge>}
                       {src.duplicateOf && <Badge tone="amber">дубль «{byId.get(src.duplicateOf)?.name}»</Badge>}
+                      {src.covered && <Badge>для сверки</Badge>}
                       <span className="w-28 text-right tabular-nums">{fmt(src.kg / 1000, 3)} т</span>
                     </label>
-                  ))}
-                </div>
+                  )
+                  const main = sourceInfo.sources.filter((x) => !x.covered)
+                  const rest = sourceInfo.sources.filter((x) => x.covered)
+                  return (
+                    <>
+                      <div className="divide-y divide-zinc-100 dark:divide-zinc-800">{main.map(row)}</div>
+                      {rest.length > 0 && (
+                        <details className="mt-1 border-t border-zinc-100 pt-1 dark:border-zinc-800">
+                          <summary className="cursor-pointer py-2 text-sm text-zinc-600 dark:text-zinc-400">Остальные документы ({rest.length})</summary>
+                          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">{rest.map(row)}</div>
+                        </details>
+                      )}
+                    </>
+                  )
+                })()}
               </div>
+              {extras.length > 0 && (
+                <div className="card p-4">
+                  <h3 className="text-sm font-semibold">Настил, метизы и прочий металл</h3>
+                  <p className="mt-0.5 mb-2 text-xs text-zinc-500">Позиции без профиля проката, указанные только весом. Входят в общий тоннаж.</p>
+                  <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {extras.map((x) => (
+                      <label key={x.fileId} className="flex cursor-pointer items-center gap-3 py-2 text-sm">
+                        <input
+                          type="checkbox"
+                          className="accent-brand-600"
+                          checked={activeExtras.has(x.fileId)}
+                          onChange={() => {
+                            const n = new Set(activeExtras)
+                            if (n.has(x.fileId)) n.delete(x.fileId)
+                            else n.add(x.fileId)
+                            setExtraSel(n)
+                          }}
+                        />
+                        <span className="min-w-0 flex-1 truncate">{x.name}</span>
+                        <span className="text-xs text-zinc-500">{x.rows} поз.</span>
+                        <span className="w-28 text-right tabular-nums">{fmt(x.kg, 1)} кг</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <Stat label="Общий тоннаж" value={fmt(metalKg / 1000, 3)} unit="т" accent />
+                <Stat label="Общий тоннаж" value={fmt(metalKg / 1000, 3)} unit="т" accent hint={extraKg ? `прокат ${fmt(profileKg / 1000, 3)} т + прочее ${fmt(extraKg / 1000, 3)} т` : undefined} />
                 <Stat label="Профилей" value={metalGroups.length} />
                 <Stat label="Строк спецификаций" value={metal.length} hint={unknownMass ? `без массы: ${unknownMass}` : undefined} />
                 <Stat label="Стоимость по справочнику" value={money(metalGroups.reduce((s, g) => s + (g.massKg / 1000) * priceOf(g.priceKey, overrides, custom), 0))} />
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="primary" onClick={metalToSpec}><ListPlus size={16} /> В спецификацию металла</Button>
-                <Button onClick={() => setDialog(metalGroups.filter((g) => g.massKg > 0).map((g) => ({ kind: 'material', name: g.name, unit: 'т', qty: round(g.massKg / 1000, 4), price: priceOf(g.priceKey, overrides, custom), source: 'docs' })))}>
+                <Button onClick={() => setDialog([...metalGroups.filter((g) => g.massKg > 0).map((g) => ({ kind: 'material' as const, name: g.name, unit: 'т', qty: round(g.massKg / 1000, 4), price: priceOf(g.priceKey, overrides, custom), source: 'docs' })), ...extras.filter((x) => activeExtras.has(x.fileId)).map((x) => ({ kind: 'material' as const, name: x.name.replace(/\.(xlsx?|xls\.xlsx|csv|docx|pdf)$/i, ''), unit: 'т', qty: round(x.kg / 1000, 4), price: 0, source: 'docs' }))])}>
                   <FilePlus2 size={16} /> В смету (по профилям)
                 </Button>
                 <Button onClick={() => exportTableXlsx('Металл из документов', 'Металл', ['Профиль', 'Масса 1 м, кг', 'Длина, м', 'Масса, кг', 'Масса, т', 'Строк'], metalGroups.map((g) => [g.name, round(g.kgPerM, 3), round(g.qtyM, 2), round(g.massKg, 2), round(g.massKg / 1000, 4), g.hits.length]), [36, 14, 12, 14, 12, 8])}>

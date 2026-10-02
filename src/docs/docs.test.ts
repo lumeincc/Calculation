@@ -229,14 +229,43 @@ describe('metal sources', () => {
     const { metalSources } = await import('./metalSources')
     const hit = (fileId: string, kg: number) => ({ fileId, massKg: kg }) as never
     const files = [
-      { id: 'reg', name: 'Реестр 2020.xlsx' },
-      { id: 'sum', name: 'Выборка металла 2020.xlsx' },
-      { id: 'card', name: 'Тех карта 2020.xlsx' },
-      { id: 'other', name: 'Ограждение.xlsx' },
+      { id: 'reg', name: 'Реестр 2020.xlsx', kind: 'sheet' as const },
+      { id: 'sum', name: 'Выборка металла 2020.xlsx', kind: 'sheet' as const },
+      { id: 'card', name: 'Тех карта 2020.xlsx', kind: 'sheet' as const },
+      { id: 'other', name: 'Ограждение.xlsx', kind: 'sheet' as const },
     ]
     const hits = [hit('reg', 4000), hit('reg', 3571.64), hit('sum', 7571.62), hit('card', 7571.64), hit('other', 500)]
     const { sources, selected } = metalSources(files, hits)
-    expect([...selected].sort()).toEqual(['other', 'sum'])
+    // With a summary present only the summary counts; other documents become a cross-check.
+    expect([...selected]).toEqual(['sum'])
     expect(sources.find((s) => s.fileId === 'reg')!.duplicateOf).toBe('sum')
+    expect(sources.find((s) => s.fileId === 'other')!.covered).toBe(true)
+    const noSummary = metalSources(files.filter((f) => f.id !== 'sum'), hits)
+    expect([...noSummary.selected].sort()).toEqual(['card', 'other'])
+  })
+})
+
+describe('assembly drawing specification', () => {
+  it('multiplies detail masses by the number of marks and reconciles glued rows', async () => {
+    const { extractDrawingSpec } = await import('./drawingSpec')
+    const rows = [
+      ['№ Кол-', 'Длина', 'Масса, кг'],
+      ['Марка', 'Сечение', 'мм', 'Сталь', 'Примечание'],
+      ['G-10', '1', 'Тр.кв.120X120X4.0 (ГОСТ_30245-2003)', '4640', 'C255', '66.1', '66.1'],
+      ['G-17', '2', '-4 x 116', '116', 'C255', '0.4', '0.8'],
+      ['G-48', '15', '-4 x 950', '243Лист ромб 4,07.7', '115.5'],
+      ['5862', '8'],
+      ['Вес сварных швов:', '0.7 кг', 'Вес марки:', '183.1 кг'],
+      ['G-10', '10', 'Балка', 'Вес всех марок:', '1831.0 кг'],
+    ]
+    const r = extractDrawingSpec([{ title: 'Стр. 1', rows }], 'f')!
+    expect(r.marks).toBe(10)
+    expect(r.hits.map((h) => h.name)).toEqual(['Труба профильная 120×120×4', 'Полоса 116×4', 'Полоса 950×4'])
+    expect(r.hits.reduce((s, h) => s + h.massKg!, 0)).toBeCloseTo((66.1 + 0.8 + 115.5) * 10, 6)
+  })
+
+  it('ignores drawings without a specification', async () => {
+    const { extractDrawingSpec } = await import('./drawingSpec')
+    expect(extractDrawingSpec([{ title: 'p', rows: [['План', 'Труба 57х3,5']] }], 'f')).toBeNull()
   })
 })

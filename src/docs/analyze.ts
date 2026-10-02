@@ -6,6 +6,7 @@ import { decodeText } from './encoding'
 import { parseCsv } from './csv'
 import { cleanMtext } from './dxfText'
 import { sanitizeHtml, tablesFromHtml } from './sanitize'
+import { extractDrawingSpec } from './drawingSpec'
 import { extractFromTable } from './tables'
 import type { Cell, DocAnalysis, DocFile, DocTable } from './types'
 import { readZip } from './zip'
@@ -45,7 +46,14 @@ async function analyzePdf(file: DocFile): Promise<DocAnalysis> {
   const { extractPdf } = await import('./pdf')
   const r = await extractPdf(file.data)
   const notes = r.text.trim().length < 20 ? ['В PDF нет текстового слоя (скан). Для распознавания нужен OCR — он в плане развития.'] : undefined
-  return finish(file, { tables: r.tables, text: r.text, pages: r.pages, notes })
+  const result = finish(file, { tables: r.tables, text: r.text, pages: r.pages, notes })
+  const drawing = extractDrawingSpec(r.tables, file.id)
+  if (drawing) {
+    // An assembly drawing: its own specification × number of marks replaces generic table rows.
+    result.metal = drawing.hits
+    result.notes = [...(result.notes ?? []), `Сборочный чертёж: ${drawing.marks} ${drawing.marks === 1 ? 'марка' : 'марок/марки'}, вес всех марок ${drawing.totalKg} кг (с учётом сварных швов).`]
+  }
+  return result
 }
 
 async function analyzeDocx(file: DocFile): Promise<DocAnalysis> {

@@ -66,6 +66,7 @@ function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
   const width = Math.max(...rows.slice(r, r + span).map((x) => x.length))
   const map: Partial<ColumnMap> = {}
   let material: number | undefined
+  let massIsTotal = false
   for (let c = 0; c < width; c++) {
     const t = rows.slice(r, r + span).map((row) => norm(row[c])).filter(Boolean).join(' ')
     if (!t || t.length > 120) continue
@@ -73,9 +74,18 @@ function mapRows(rows: Cell[][], r: number, span: number): ColumnMap | null {
     if (roles.includes('mass')) {
       const isUnit = /(ед|1\s*(шт|м|п\.?\s*м)|одного|одной|одна|един)/.test(t) && !/(общ|всего|всех|итого)/.test(t)
       const isT = /(,|\s|\()\s*т\.?(\s|\)|$)|тонн/.test(t)
+      const isTotal = /(общ|всего|всех|итого)/.test(t)
       if (isUnit) {
         if (map.unitMass === undefined) Object.assign(map, { unitMass: c, unitMassT: isT })
-      } else if (map.mass === undefined) Object.assign(map, { mass: c, massUnitT: isT })
+      } else if (map.mass === undefined) {
+        Object.assign(map, { mass: c, massUnitT: isT })
+        massIsTotal = isTotal
+      } else if (isTotal && !massIsTotal) {
+        // «Вес марки» then «Вес всех»: the total wins, the first becomes the unit mass.
+        if (map.unitMass === undefined) Object.assign(map, { unitMass: map.mass, unitMassT: map.massUnitT })
+        Object.assign(map, { mass: c, massUnitT: isT })
+        massIsTotal = true
+      }
       continue
     }
     if (roles.includes('price') && map.price === undefined) map.price = c
